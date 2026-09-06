@@ -154,6 +154,13 @@ export const IconFlag = ({ className = ic }: { className?: string }) => (
   </svg>
 );
 
+export const IconQuestion = ({ className = ic }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M6.5 6a1.7 1.7 0 1 1 2.6 1.4c-.9.6-1.1 1-1.1 1.9" />
+    <circle cx="8" cy="11.8" r="0.5" fill="currentColor" stroke="none" />
+  </svg>
+);
+
 export const LogoMark = ({ size = 38 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden className="shrink-0">
     <defs>
