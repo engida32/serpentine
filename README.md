@@ -4,7 +4,7 @@ An open-source, offline-first retro game store for TVs. Pick a game, plug in a
 controller (or use the remote), play. No account, no ads, no tracking — just
 arcade games designed for the couch.
 
-**Play it live:** https://engida32.github.io/serpentine
+**Play it live:** https://serpentine-arcade.vercel.app
 
 ## Games
 
@@ -26,10 +26,10 @@ offline.
 
 | Need | Free solution |
 | --- | --- |
-| Hosting | GitHub Pages |
+| Hosting | Vercel |
 | Game leaderboards | Supabase free tier (optional — falls back to local scores offline) |
 | Fonts | Bundled locally as woff2 |
-| Build/deploy | GitHub Actions (free for public repos) |
+| Build/deploy | Vercel (auto-deploys on every push to `main`) |
 | Network | None required — the game is a PWA and works fully offline |
 
 ## Features
@@ -103,9 +103,19 @@ create index if not exists scores_difficulty_week_idx
 ```
 
 3. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Locally put them in a
-   `.env` file; for the deployed site add them as repository **Actions
-   secrets** on GitHub so the build receives them. Without these the game
-   still works and keeps rankings on-device.
+   `.env` file; for the deployed site add them as **Environment Variables** on
+   Vercel (Project → Settings → Environment Variables, scope: Production).
+   Without these the game still works and keeps rankings on-device.
+
+## Deploy to Vercel
+
+1. Import the repo at [vercel.com/new](https://vercel.com/new) (framework:
+   Vite is auto-detected; `vercel.json` supplies the SPA fallback).
+2. Add `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` as Production env vars if
+   you want the global leaderboard.
+3. Deploy. Every push to `main` rebuilds automatically; the site serves at
+   `serpentine-arcade.vercel.app` (rename freely in Project → Settings →
+   Domains).
 
 ## Project structure
 

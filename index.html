@@ -4,15 +4,108 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <meta name="theme-color" content="#06110c" />
-    <meta name="description" content="Serpentine Arcade — eight playable arcade classics in one browser: Snake, Block Twist, Breakout, Invaders, Pong, Asteroids, Minesweeper and Memory. Works offline." />
+    <meta name="description" content="Serpentine Arcade — eight playable arcade classics in one browser: Snake, Block Twist, Breakout, Invaders, Pong, Asteroids, Minesweeper and Memory. Play free, works offline." />
+    <meta name="robots" content="index, follow" />
     <title>Serpentine Arcade</title>
+    <link rel="canonical" href="https://serpentine-arcade.vercel.app/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Serpentine Arcade" />
+    <meta property="og:title" content="Serpentine Arcade" />
+    <meta property="og:description" content="Eight playable arcade classics in one browser tab — Snake, Block Twist, Breakout, Invaders, Pong, Asteroids, Minesweeper and Memory. Play free, works offline, gamepad friendly." />
+    <meta property="og:url" content="https://serpentine-arcade.vercel.app/" />
+    <meta property="og:image" content="https://serpentine-arcade.vercel.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Serpentine Arcade logo and the eight arcade games it contains" />
+    <meta property="og:locale" content="en_US" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Serpentine Arcade" />
+    <meta name="twitter:description" content="Eight arcade classics in one browser tab — Snake, Block Twist, Breakout, Invaders, Pong, Asteroids, Minesweeper and Memory. Free, offline, gamepad friendly." />
+    <meta name="twitter:image" content="https://serpentine-arcade.vercel.app/og.png" />
+    <meta name="twitter:image:alt" content="Serpentine Arcade logo and the eight arcade games it contains" />
+
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2306110c'/%3E%3Cpath d='M7 22c0-4 4-4 9-4s9 0 9-4-4-4-9-4' fill='none' stroke='%233ddc84' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='7' cy='22' r='3' fill='%23a3f55a'/%3E%3C/svg%3E"
     />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "name": "Serpentine Arcade",
+          "url": "https://serpentine-arcade.vercel.app/",
+          "description": "Eight playable arcade classics in one browser tab.",
+          "inLanguage": "en"
+        },
+        {
+          "@type": "VideoGame",
+          "name": "Serpentine Arcade",
+          "url": "https://serpentine-arcade.vercel.app/",
+          "image": "https://serpentine-arcade.vercel.app/og.png",
+          "description": "A collection of eight playable arcade classics — Snake, Block Twist, Breakout, Invaders, Pong, Asteroids, Minesweeper and Memory. Free to play, works offline, keyboard and gamepad controls.",
+          "applicationCategory": "Game",
+          "gamePlatform": ["Web Browser", "Any"],
+          "operatingSystem": "Any",
+          "genre": ["Arcade", "Snake", "Puzzle", "Shooter"],
+          "numberOfPlayers": "1",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+          }
+        },
+        {
+          "@type": "ItemList",
+          "name": "Games in Serpentine Arcade",
+          "itemListElement": [
+            { "@type": "VideoGame", "position": 1, "name": "Snake" },
+            { "@type": "VideoGame", "position": 2, "name": "Block Twist" },
+            { "@type": "VideoGame", "position": 3, "name": "Breakout" },
+            { "@type": "VideoGame", "position": 4, "name": "Space Invaders" },
+            { "@type": "VideoGame", "position": 5, "name": "Pong" },
+            { "@type": "VideoGame", "position": 6, "name": "Asteroids" },
+            { "@type": "VideoGame", "position": 7, "name": "Minesweeper" },
+            { "@type": "VideoGame", "position": 8, "name": "Memory" }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main style="max-width: 780px; margin: 0 auto; padding: 48px 24px; font-family: system-ui, sans-serif; color: #06110c;">
+        <h1 style="margin: 0 0 12px; font-size: 40px; color: #0a1e15;">Serpentine Arcade</h1>
+        <p style="margin: 0 0 8px; font-size: 18px; line-height: 1.5;">
+          Eight playable arcade classics in one browser tab — <strong>Snake</strong>, <strong>Block Twist</strong>,
+          <strong>Breakout</strong>, <strong>Space Invaders</strong>, <strong>Pong</strong>, <strong>Asteroids</strong>,
+          <strong>Minesweeper</strong> and <strong>Memory</strong>.
+        </p>
+        <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #4f7a61;">
+          Play free. Works offline. Installable as a PWA. Keyboard, mouse, touch and gamepad supported.
+        </p>
+      </main>
+    </div>
+    <noscript>
+      <main style="max-width: 780px; margin: 0 auto; padding: 48px 24px; font-family: system-ui, sans-serif; color: #06110c;">
+        <h1 style="margin: 0 0 12px; font-size: 40px; color: #0a1e15;">Serpentine Arcade</h1>
+        <p style="margin: 0 0 8px; font-size: 18px; line-height: 1.5;">
+          Eight playable arcade classics in one browser tab — <strong>Snake</strong>, <strong>Block Twist</strong>,
+          <strong>Breakout</strong>, <strong>Space Invaders</strong>, <strong>Pong</strong>, <strong>Asteroids</strong>,
+          <strong>Minesweeper</strong> and <strong>Memory</strong>.
+        </p>
+        <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #4f7a61;">
+          Serpentine Arcade is a JavaScript app — enable JavaScript in your browser to play.
+        </p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
