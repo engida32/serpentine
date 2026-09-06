@@ -94,6 +94,19 @@ class Sfx {
   record() {
     [523, 659, 784, 1046, 1318].forEach((f, i) => this.tone(f, 0.14, { wave: "triangle", vol: 0.6, delay: i * 0.08 }));
   }
+  slide() {
+    this.tone(220, 0.05, { wave: "sine", vol: 0.35 });
+  }
+  merge() {
+    this.tone(520, 0.08, { wave: "triangle", vol: 0.55, slide: 220 });
+    this.tone(780, 0.1, { wave: "triangle", vol: 0.45, delay: 0.05 });
+  }
+  place() {
+    this.tone(330, 0.05, { wave: "sine", vol: 0.3 });
+  }
+  combo() {
+    [660, 880, 1108].forEach((f, i) => this.tone(f, 0.09, { wave: "triangle", vol: 0.5, delay: i * 0.045 }));
+  }
 }
 
 export const sfx = new Sfx();
