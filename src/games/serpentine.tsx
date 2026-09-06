@@ -6,9 +6,9 @@ import {
   type DifficultyId,
   type DirName,
   type HudState,
-} from "./game/engine";
-import { sfx } from "./game/audio";
-import { ArcadeButton, DPad, IconBtn, Stat } from "./ui/controls";
+} from "../game/engine";
+import { sfx } from "../game/audio";
+import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
 import {
   IconChevron,
   IconCrown,
@@ -16,13 +16,15 @@ import {
   IconPause,
   IconPlay,
   IconRestart,
+  IconSnake,
   IconSound,
   IconTrophy,
-} from "./ui/icons";
-import { useGamepad } from "./ui/input";
-import { LeaderboardModal } from "./ui/LeaderboardModal";
-import { ShareButton } from "./ui/ShareButton";
-import type { SharePayload } from "./game/share";
+} from "../ui/icons";
+import { useGamepad } from "../ui/input";
+import { LeaderboardModal } from "../ui/LeaderboardModal";
+import { ShareButton } from "../ui/ShareButton";
+import type { SharePayload } from "../game/share";
+import type { GameDef } from "./types";
 
 const INITIAL_HUD: HudState = {
   phase: "menu",
@@ -529,3 +531,23 @@ export function SnakeGame({
     </main>
   );
 }
+
+export const serpentine: GameDef = {
+  id: "serpentine",
+  name: "SERPENTINE",
+  tagline: "Eat · Grow · Survive",
+  accent: "text-lime",
+  icon: <IconSnake />,
+  readBest: () => {
+    let max = 0;
+    for (const d of DIFFICULTIES) {
+      try {
+        max = Math.max(max, Number(localStorage.getItem(`serpentine.best.${d.id}`) ?? 0) || 0);
+      } catch {
+        /* ignore */
+      }
+    }
+    return max;
+  },
+  render: ({ onFullscreen, ...rest }) => <SnakeGame toggleFullscreen={onFullscreen} {...rest} />,
+};

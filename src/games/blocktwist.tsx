@@ -1,21 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
-import { Blocks, BSIZE, type BTile, type BlockPhase } from "./game/block";
-import { sfx } from "./game/audio";
-import type { DirName } from "./game/engine";
-import { ArcadeButton, DPad, IconBtn, Stat } from "./ui/controls";
+import { Blocks, BSIZE, type BTile, type BlockPhase } from "../game/block";
+import { sfx } from "../game/audio";
+import type { DirName } from "../game/engine";
+import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
 import {
   IconChevron,
   IconCrown,
+  IconGrid,
   IconHome,
   IconRestart,
   IconSound,
   IconTrophy,
-} from "./ui/icons";
-import { useGamepad } from "./ui/input";
-import { LeaderboardModal } from "./ui/LeaderboardModal";
-import { ShareButton } from "./ui/ShareButton";
-import type { SharePayload } from "./game/share";
+} from "../ui/icons";
+import { useGamepad } from "../ui/input";
+import { LeaderboardModal } from "../ui/LeaderboardModal";
+import { ShareButton } from "../ui/ShareButton";
+import type { SharePayload } from "../game/share";
+import type { GameDef } from "./types";
 
 const BEST_KEY = "serpentine.2048.best";
 const CELL = 100 / BSIZE;
@@ -406,3 +408,19 @@ export function BlockGame({
     </main>
   );
 }
+
+export const blocktwist: GameDef = {
+  id: "blocktwist",
+  name: "BLOCK TWIST",
+  tagline: "Slide · Merge · Reach 2048",
+  accent: "text-gold",
+  icon: <IconGrid />,
+  readBest: () => {
+    try {
+      return Number(localStorage.getItem("serpentine.2048.best") ?? 0) || 0;
+    } catch {
+      return 0;
+    }
+  },
+  render: ({ onFullscreen, ...rest }) => <BlockGame toggleFullscreen={onFullscreen} {...rest} />,
+};

@@ -1,38 +1,16 @@
 import { useEffect, useState } from "react";
-import { DIFFICULTIES } from "./game/engine";
 import { sfx } from "./game/audio";
-import { SnakeGame } from "./SnakeGame";
-import { BlockGame } from "./BlockGame";
+import { GAMES, type GameDef } from "./games";
 import { IconBtn } from "./ui/controls";
-import { IconChevron, IconGrid, IconMinimize, IconExpand, IconSnake, IconSound, LogoMark } from "./ui/icons";
+import { IconChevron, IconMinimize, IconExpand, IconSound, LogoMark } from "./ui/icons";
 import { useFullscreen } from "./ui/fullscreen";
 import { useGamepad } from "./ui/input";
 
-export type GameId = "hub" | "snake" | "blocks";
-
-function readSnakeBest(): number {
-  let max = 0;
-  for (const d of DIFFICULTIES) {
-    try {
-      max = Math.max(max, Number(localStorage.getItem(`serpentine.best.${d.id}`) ?? 0) || 0);
-    } catch {
-      /* ignore */
-    }
-  }
-  return max;
-}
-
-function readBlocksBest(): number {
-  try {
-    return Number(localStorage.getItem("serpentine.2048.best") ?? 0) || 0;
-  } catch {
-    return 0;
-  }
-}
+type GameId = GameDef["id"];
 
 export default function Arcade() {
-  const [game, setGame] = useState<GameId>("hub");
-  const [sel, setSel] = useState<0 | 1>(0);
+  const [gameId, setGameId] = useState<GameId | null>(null);
+  const [sel, setSel] = useState(0);
   const { isFs, toggle } = useFullscreen();
   const [muted, setMutedState] = useState(() => {
     try {
@@ -41,6 +19,8 @@ export default function Arcade() {
       return false;
     }
   });
+
+  const active = gameId ? GAMES.find((g) => g.id === gameId) : undefined;
 
   useEffect(() => {
     sfx.muted = muted;
@@ -53,16 +33,16 @@ export default function Arcade() {
 
   const onMute = () => setMutedState((v) => !v);
 
-  const play = (g: GameId) => {
-    if (g === "hub") return;
+  const play = (id: GameId) => {
     sfx.unlock();
     sfx.select();
-    setGame(g);
+    setGameId(id);
+    setSel(0);
   };
 
   /* hub navigation */
   useEffect(() => {
-    if (game !== "hub") return;
+    if (gameId !== null) return;
     const onKey = (e: KeyboardEvent) => {
       sfx.unlock();
       const lower = e.key.toLowerCase();
@@ -70,59 +50,41 @@ export default function Arcade() {
       if (lower === "f") return toggle();
       if (["arrowdown", "arrowup", "s", "w"].includes(lower)) {
         e.preventDefault();
-        setSel((s) => (s === 0 ? 1 : 0));
+        setSel((s) => (s + 1) % GAMES.length);
         sfx.select();
         return;
       }
       if (e.key === "Enter" || e.key === " " || lower === "1") {
         e.preventDefault();
-        play(sel === 0 ? "snake" : "blocks");
+        play(GAMES[sel % GAMES.length].id);
         return;
       }
-      if (lower === "2") {
+      if (lower === "2" && GAMES[1]) {
         e.preventDefault();
-        play("blocks");
+        play(GAMES[1].id);
+        return;
+      }
+      if (lower === "3" && GAMES[2]) {
+        e.preventDefault();
+        play(GAMES[2].id);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game, sel]);
+  }, [gameId, sel]);
 
   useGamepad({
     onDir: (d) => {
-      if (game !== "hub") return;
+      if (gameId !== null) return;
       if (d === "up" || d === "down") {
-        setSel((s) => (s === 0 ? 1 : 0));
+        setSel((s) => (s + 1) % GAMES.length);
         sfx.select();
       }
     },
-    onPrimary: () => game === "hub" && play(sel === 0 ? "snake" : "blocks"),
-    onStart: () => game === "hub" && play(sel === 0 ? "snake" : "blocks"),
+    onPrimary: () => gameId === null && play(GAMES[sel % GAMES.length].id),
+    onStart: () => gameId === null && play(GAMES[sel % GAMES.length].id),
   });
-
-  const games = [
-    {
-      id: "snake" as const,
-      icon: <IconSnake />,
-      name: "SERPENTINE",
-      tagline: "Eat · Grow · Survive",
-      best: readSnakeBest(),
-      accent: "text-lime",
-      border: "border-lime/50",
-      glow: "hover:shadow-[0_0_40px_rgba(163,245,90,0.25)]",
-    },
-    {
-      id: "blocks" as const,
-      icon: <IconGrid />,
-      name: "BLOCK TWIST",
-      tagline: "Slide · Merge · Reach 2048",
-      best: readBlocksBest(),
-      accent: "text-gold",
-      border: "border-gold/50",
-      glow: "hover:shadow-[0_0_40px_rgba(255,207,92,0.25)]",
-    },
-  ];
 
   return (
     <div
@@ -154,7 +116,7 @@ export default function Arcade() {
               SERPENTINE ARCADE
             </h1>
             <p className="text-[10px] sm:text-[11px] text-fog tracking-[0.28em] mt-1 uppercase truncate">
-              {game === "snake" ? "Serpentine — Arcade Snake" : game === "blocks" ? "Block Twist — Slide & Merge" : "Two games · Works offline"}
+              {active ? `${active.name} — ${active.tagline}` : `${GAMES.length} games · Works offline`}
             </p>
           </div>
         </div>
@@ -168,10 +130,8 @@ export default function Arcade() {
         </div>
       </header>
 
-      {game === "snake" ? (
-        <SnakeGame muted={muted} onMute={onMute} onExit={() => setGame("hub")} toggleFullscreen={toggle} />
-      ) : game === "blocks" ? (
-        <BlockGame muted={muted} onMute={onMute} onExit={() => setGame("hub")} toggleFullscreen={toggle} />
+      {active ? (
+        active.render({ muted, onMute, onExit: () => setGameId(null), onFullscreen: toggle })
       ) : (
         <main className="relative z-10 flex-1 min-h-0 flex flex-col items-center justify-center gap-5 sm:gap-6 px-4 py-6 overflow-y-auto">
           <div className="text-center">
@@ -181,20 +141,24 @@ export default function Arcade() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full max-w-[620px]">
-            {games.map((g, i) => {
-              const active = sel === i;
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full max-w-[820px]">
+            {GAMES.map((g, i) => {
+              const isActive = sel === i;
+              const best = g.readBest?.() ?? 0;
               return (
                 <button
                   key={g.id}
                   type="button"
                   onClick={() => play(g.id)}
-                  onMouseEnter={() => setSel(i as 0 | 1)}
+                  onMouseEnter={() => setSel(i)}
                   className={`group relative rounded-lg border-2 bg-pit/85 p-5 sm:p-6 text-left transition-all duration-150 cursor-pointer
-                    ${g.border} ${g.glow} ${active ? "bg-moss/70 shadow-[0_0_30px_rgba(0,0,0,0.4)]" : "hover:bg-moss/40"}`}
-                  style={active ? { boxShadow: `0 0 26px ${g.id === "snake" ? "rgba(163,245,90,0.22)" : "rgba(255,207,92,0.22)"}` } : undefined}
+                    ${isActive ? "bg-moss/70" : "hover:bg-moss/40"}`}
+                  style={{
+                    borderColor: isActive ? (g.id === "serpentine" ? "#a3f55a" : g.id === "blocktwist" ? "#ffcf5c" : "#ff6257") : "rgba(39,148,104,0.5)",
+                    boxShadow: isActive ? `0 0 26px ${g.id === "serpentine" ? "rgba(163,245,90,0.22)" : g.id === "blocktwist" ? "rgba(255,207,92,0.22)" : "rgba(255,98,87,0.22)"}` : undefined,
+                  }}
                 >
-                  {active && (
+                  {isActive && (
                     <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-lime animate-blink" />
                   )}
                   <span className={`w-10 h-10 grid place-items-center rounded-md bg-moss border border-line mb-3 ${g.accent}`}>
@@ -204,10 +168,17 @@ export default function Arcade() {
                     <span className={`font-display text-[13px] ${g.accent}`}>{g.name}</span>
                     <span className="block text-[11px] text-fog mt-1.5">{g.tagline}</span>
                     <span className="flex items-center justify-between mt-4">
-                      <span className="inline-flex items-center gap-1.5 text-gold">
-                        <span className="text-[8px] font-display text-fog/70">BEST</span>
-                        <span className="font-display text-[11px] tabular-nums">{g.best}</span>
-                      </span>
+                      {g.readBest ? (
+                        <span className="inline-flex items-center gap-1.5 text-gold">
+                          <span className="text-[8px] font-display text-fog/70">BEST</span>
+                          <span className="font-display text-[11px] tabular-nums">{best}</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-gold">
+                          <span className="text-[8px] font-display text-fog/70">COIN-OP</span>
+                          <span className="font-display text-[9px]">FREE PLAY</span>
+                        </span>
+                      )}
                       <span className="inline-flex items-center gap-1 font-display text-[9px] text-lime group-hover:gap-2 transition-all">
                         PLAY <IconChevron rotate={-90} />
                       </span>
@@ -218,9 +189,9 @@ export default function Arcade() {
             })}
           </div>
 
-          <p className="text-[11px] text-fog/75 text-center leading-relaxed max-w-[460px]">
-            Arrows / <span className="keycap">1</span> / <span className="keycap">2</span> to choose ·{" "}
-            <span className="keycap">ENTER</span> to play · works offline and with controllers
+          <p className="text-[11px] text-fog/75 text-center leading-relaxed max-w-[520px]">
+            Arrows <span className="keycap">↑</span><span className="keycap">↓</span> + <span className="keycap">1</span>–{GAMES.length.toString()}{" "}
+            to pick · <span className="keycap">ENTER</span> to play · works offline, with controllers, no account needed
           </p>
         </main>
       )}
