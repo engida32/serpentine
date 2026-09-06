@@ -29,7 +29,7 @@ export function ShareButton({ payload, variant = "ghost" }: { payload: SharePayl
       type="button"
       title={copied ? "Copied!" : "Copy score to share"}
       onClick={doCopy}
-      className={`font-display uppercase text-[9px] inline-flex items-center justify-center gap-2 select-none px-3.5 py-2.5 rounded-md border-b-4 transition-all duration-100 active:translate-y-[3px] active:border-b-0 cursor-pointer ${styles[variant]}`}
+      className={`font-display uppercase text-[9px] tv:text-sm inline-flex items-center justify-center gap-2 select-none px-3.5 py-2.5 rounded-md border-b-4 transition-all duration-100 active:translate-y-[3px] active:border-b-0 cursor-pointer ${styles[variant]}`}
     >
       {copied ? (
         <>

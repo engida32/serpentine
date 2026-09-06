@@ -1,14 +1,25 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sfx } from "./game/audio";
 import { GAMES, type GameDef } from "./games";
 import { gamesPlayed, TROPHIES, totalPoints, trophiesForGame, trophyCount } from "./game/progress";
 import { IconBtn } from "./ui/controls";
+import { GameErrorBoundary } from "./ui/ErrorBoundary";
 import { IconChevron, IconMinimize, IconExpand, IconSound, IconTrophy, LogoMark } from "./ui/icons";
 import { useFullscreen } from "./ui/fullscreen";
-import { isTypingTarget, useGamepad } from "./ui/input";
+import { autoTvMode, installInput, isTypingTarget, routeBack, useGamepad } from "./ui/input";
+import { installNativeBack, isNative } from "./platform/native";
 import { TrophyModal } from "./ui/TrophyModal";
 
 type GameId = GameDef["id"];
+
+const HISTORY_TAG = "serpentine:game";
+
+const ACCENT_HEX: Record<string, string> = {
+  "text-lime": "#a3f55a",
+  "text-gold": "#ffcf5c",
+  "text-coral": "#ff6257",
+  "text-mint": "#3ddc84",
+};
 
 export default function Arcade() {
   const [gameId, setGameId] = useState<GameId | null>(null);
@@ -22,6 +33,16 @@ export default function Arcade() {
       return false;
     }
   });
+  const tv = useMemo(() => autoTvMode() || isNative, []);
+
+  const gameIdRef = useRef(gameId);
+  gameIdRef.current = gameId;
+  /** True while a popstate-triggered back is being dispatched. */
+  const poppingRef = useRef(false);
+  /** Set when a game exits during a popstate dispatch, so we don't re-arm the history entry. */
+  const exitedInPopRef = useRef(false);
+  /** Set when we call history.back() ourselves, so the resulting popstate is ignored. */
+  const suppressPopRef = useRef(false);
 
   const active = gameId ? GAMES.find((g) => g.id === gameId) : undefined;
 
@@ -34,37 +55,83 @@ export default function Arcade() {
     }
   }, [muted]);
 
-  const onMute = () => setMutedState((v) => !v);
+  /* one-time platform wiring: input layer, native back button, TV class */
+  useEffect(() => {
+    const stopInput = installInput();
+    let stopNative = () => {};
+    void installNativeBack().then((fn) => (stopNative = fn));
+    document.documentElement.classList.toggle("tv", tv);
+    return () => {
+      stopInput();
+      stopNative();
+    };
+  }, [tv]);
 
-  const play = (id: GameId) => {
+  const onMute = useCallback(() => setMutedState((v) => !v), []);
+
+  /**
+   * Leaving a game. In a browser the game entry was pushed onto history, so
+   * consume it (unless the exit was itself caused by a Back navigation).
+   */
+  const exitGame = useCallback(() => {
+    sfx.select();
+    if (poppingRef.current) {
+      exitedInPopRef.current = true;
+      setGameId(null);
+      return;
+    }
+    if (window.history.state?.tag === HISTORY_TAG) {
+      suppressPopRef.current = true;
+      window.history.back();
+    }
+    setGameId(null);
+  }, []);
+
+  const play = useCallback((id: GameId) => {
     sfx.unlock();
     sfx.select();
+    const idx = GAMES.findIndex((g) => g.id === id);
+    if (idx >= 0) setSel(idx);
+    if (window.history.state?.tag !== HISTORY_TAG) window.history.pushState({ tag: HISTORY_TAG, id }, "");
     setGameId(id);
-    setSel(0);
-  };
+  }, []);
 
-  /* hub navigation */
+  /* browser / Android TV Back button = history navigation */
+  useEffect(() => {
+    const onPop = () => {
+      if (suppressPopRef.current) {
+        suppressPopRef.current = false;
+        return;
+      }
+      if (gameIdRef.current === null) return;
+      poppingRef.current = true;
+      exitedInPopRef.current = false;
+      const handled = routeBack();
+      poppingRef.current = false;
+      if (!handled) {
+        setGameId(null);
+        return;
+      }
+      // Back was consumed inside the game (modal closed, returned to its menu):
+      // re-arm the history entry so the next Back press reaches us again.
+      if (!exitedInPopRef.current) window.history.pushState({ tag: HISTORY_TAG, id: gameIdRef.current }, "");
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  /* hub shortcuts (arrows/enter are handled by the shared focus layer) */
   useEffect(() => {
     if (gameId !== null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (isTypingTarget(e)) return;
-      if (trophyOpen) {
-        if (e.key === "Escape") setTrophyOpen(false);
-        return;
-      }
+      if (isTypingTarget(e) || e.defaultPrevented) return;
+      if (trophyOpen) return;
       sfx.unlock();
       const lower = e.key.toLowerCase();
       if (lower === "m") return onMute();
       if (lower === "f") return toggle();
-      if (["arrowdown", "arrowup", "s", "w"].includes(lower)) {
-        e.preventDefault();
-        setSel((s) => (s + 1) % GAMES.length);
-        sfx.select();
-        return;
-      }
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        play(GAMES[sel % GAMES.length].id);
+      if (lower === "t") {
+        setTrophyOpen(true);
         return;
       }
       const n = parseInt(lower, 10);
@@ -75,19 +142,13 @@ export default function Arcade() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameId, sel, trophyOpen]);
+  }, [gameId, trophyOpen, onMute, toggle, play]);
 
+  /* gamepad Start on the hub launches the highlighted game */
   useGamepad({
-    onDir: (d) => {
-      if (gameId !== null || trophyOpen) return;
-      if (d === "up" || d === "down") {
-        setSel((s) => (s + 1) % GAMES.length);
-        sfx.select();
-      }
+    onStart: () => {
+      if (gameId === null && !trophyOpen) play(GAMES[sel % GAMES.length].id);
     },
-    onPrimary: () => gameId === null && !trophyOpen && play(GAMES[sel % GAMES.length].id),
-    onStart: () => gameId === null && !trophyOpen && play(GAMES[sel % GAMES.length].id),
   });
 
   return (
@@ -109,114 +170,135 @@ export default function Arcade() {
       </div>
 
       {/* header */}
-      <header className="relative z-10 flex items-center justify-between px-3 sm:px-6 h-14 sm:h-16 shrink-0 border-b border-line/60 bg-pit/60">
+      <header className="relative z-10 flex items-center justify-between px-3 sm:px-6 tv:px-10 h-14 sm:h-16 tv:h-20 shrink-0 border-b border-line/60 bg-pit/60">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <LogoMark />
           <div className="leading-none min-w-0">
             <h1
-              className="font-display text-[13px] sm:text-base text-lime truncate"
+              className="font-display text-[13px] sm:text-base tv:text-xl text-lime truncate"
               style={{ textShadow: "0 0 18px rgba(163,245,90,0.45), 2px 2px 0 rgba(15,122,77,0.9)" }}
             >
               SERPENTINE ARCADE
             </h1>
-            <p className="text-[10px] sm:text-[11px] text-fog tracking-[0.28em] mt-1 uppercase truncate">
+            <p className="text-[10px] sm:text-[11px] tv:text-sm text-fog tracking-[0.28em] mt-1 uppercase truncate">
               {active ? `${active.name} — ${active.tagline}` : `${GAMES.length} games · Works offline`}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <IconBtn title={isFs ? "Exit fullscreen (F)" : "Fullscreen (F)"} onClick={toggle}>
-            {isFs ? <IconMinimize /> : <IconExpand />}
-          </IconBtn>
-          <IconBtn title={muted ? "Unmute (M)" : "Mute (M)"} onClick={onMute}>
+        {/* Header buttons are pointer-only; remotes use the M/F shortcuts and the game overlays. */}
+        <div className="flex items-center gap-2" data-pointer-only>
+          {!isNative && (
+            <IconBtn title={isFs ? "Exit fullscreen (F)" : "Fullscreen (F)"} onClick={toggle} tabIndex={-1}>
+              {isFs ? <IconMinimize /> : <IconExpand />}
+            </IconBtn>
+          )}
+          <IconBtn title={muted ? "Unmute (M)" : "Mute (M)"} onClick={onMute} tabIndex={-1}>
             <IconSound muted={muted} />
           </IconBtn>
         </div>
       </header>
 
       {active ? (
-        active.render({ muted, onMute, onExit: () => setGameId(null), onFullscreen: toggle })
+        <GameErrorBoundary resetKey={active.id} onHome={exitGame}>
+          {active.render({ muted, onMute, onExit: exitGame, onFullscreen: toggle })}
+        </GameErrorBoundary>
       ) : (
-        <main className="relative z-10 flex-1 min-h-0 flex flex-col items-center justify-center gap-5 sm:gap-6 px-4 py-6 overflow-y-auto">
+        <main className="relative z-10 flex-1 min-h-0 flex flex-col items-center justify-center gap-5 sm:gap-6 tv:gap-8 px-4 py-6 overflow-y-auto">
           <div className="text-center">
-            <p className="font-display text-[9px] text-gold tracking-widest animate-blink">— INSERT COIN —</p>
-            <h2 className="font-display text-lg sm:text-2xl text-foam mt-3" style={{ textShadow: "0 0 24px rgba(61,220,132,0.35)" }}>
+            <p className="font-display text-[9px] tv:text-sm text-gold tracking-widest animate-blink">— INSERT COIN —</p>
+            <h2
+              className="font-display text-lg sm:text-2xl tv:text-4xl text-foam mt-3 tv:mt-5"
+              style={{ textShadow: "0 0 24px rgba(61,220,132,0.35)" }}
+            >
               SELECT A GAME
             </h2>
           </div>
 
-          <div className="flex items-center justify-center gap-2 flex-wrap">
+          <div className="flex items-center justify-center gap-2 tv:gap-3 flex-wrap">
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => {
                 sfx.select();
                 setTrophyOpen(true);
               }}
               className="inline-flex items-center gap-1.5 rounded-md border border-line/60 bg-moss/40 px-2.5 py-1.5 text-gold hover:text-lime hover:border-lime/50 transition-colors cursor-pointer"
             >
-              <IconTrophy className="w-3.5 h-3.5" />
-              <span className="font-display text-[10px] tabular-nums">{trophyCount()}/{TROPHIES.length}</span>
-              <span className="text-[8px] font-display text-fog/70">TROPHIES</span>
+              <IconTrophy className="w-3.5 h-3.5 tv:w-5 tv:h-5" />
+              <span className="font-display text-[10px] tv:text-base tabular-nums">
+                {trophyCount()}/{TROPHIES.length}
+              </span>
+              <span className="text-[8px] tv:text-xs font-display text-fog/70">TROPHIES</span>
+              <span className="hidden tv:inline keycap ml-1">T</span>
             </button>
             <span className="inline-flex items-center gap-1.5 rounded-md border border-line/60 bg-moss/30 px-2.5 py-1.5 text-foam">
-              <span className="font-display text-[10px] tabular-nums">{gamesPlayed()}</span>
-              <span className="text-[8px] font-display text-fog/70">GAMES</span>
+              <span className="font-display text-[10px] tv:text-base tabular-nums">{gamesPlayed()}</span>
+              <span className="text-[8px] tv:text-xs font-display text-fog/70">GAMES</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-md border border-line/60 bg-moss/30 px-2.5 py-1.5 text-foam">
-              <span className="font-display text-[10px] tabular-nums">{totalPoints()}</span>
-              <span className="text-[8px] font-display text-fog/70">PTS</span>
+              <span className="font-display text-[10px] tv:text-base tabular-nums">{totalPoints()}</span>
+              <span className="text-[8px] tv:text-xs font-display text-fog/70">PTS</span>
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full max-w-[820px]">
+          {/* The grid is a focus scope: D-pad / arrows move between cards, Enter / A launches. */}
+          <div
+            data-menu
+            role="group"
+            aria-label="Games"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 tv:grid-cols-4 gap-3 sm:gap-4 tv:gap-5 w-full max-w-[820px] tv:max-w-[1500px]"
+          >
             {GAMES.map((g, i) => {
               const isActive = sel === i;
               const best = g.readBest?.() ?? 0;
               const achv = trophiesForGame(g.id);
+              const hex = ACCENT_HEX[g.accent] ?? "#3ddc84";
               return (
                 <button
                   key={g.id}
                   type="button"
+                  aria-label={`Play ${g.name}`}
+                  data-autofocus={isActive || undefined}
                   onClick={() => play(g.id)}
+                  onFocus={() => setSel(i)}
                   onMouseEnter={() => setSel(i)}
-                  className={`group relative rounded-lg border-2 bg-pit/85 p-5 sm:p-6 text-left transition-all duration-150 cursor-pointer
+                  className={`game-card group relative rounded-lg border-2 bg-pit/85 p-5 sm:p-6 text-left transition-all duration-150 cursor-pointer
                     ${isActive ? "bg-moss/70" : "hover:bg-moss/40"}`}
                   style={{
-                    borderColor: isActive ? (g.id === "serpentine" ? "#a3f55a" : g.id === "blocktwist" ? "#ffcf5c" : "#ff6257") : "rgba(39,148,104,0.5)",
-                    boxShadow: isActive ? `0 0 26px ${g.id === "serpentine" ? "rgba(163,245,90,0.22)" : g.id === "blocktwist" ? "rgba(255,207,92,0.22)" : "rgba(255,98,87,0.22)"}` : undefined,
+                    borderColor: isActive ? hex : "rgba(39,148,104,0.5)",
+                    boxShadow: isActive ? `0 0 26px ${hex}38` : undefined,
+                    ["--card-accent" as string]: hex,
                   }}
                 >
-                  {isActive && (
-                    <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-lime animate-blink" />
-                  )}
-                  <span className={`w-10 h-10 grid place-items-center rounded-md bg-moss border border-line mb-3 ${g.accent}`}>
+                  {isActive && <span className="absolute top-2.5 right-2.5 w-2 h-2 tv:w-3 tv:h-3 rounded-full bg-lime animate-blink" />}
+                  <span className={`w-10 h-10 tv:w-14 tv:h-14 grid place-items-center rounded-md bg-moss border border-line mb-3 ${g.accent}`}>
                     {g.icon}
                   </span>
                   <span className="block">
-                    <span className={`font-display text-[13px] ${g.accent}`}>{g.name}</span>
-                    <span className="block text-[11px] text-fog mt-1.5">{g.tagline}</span>
-                    {g.by && <span className="block text-[9px] text-mint mt-1.5">made by @{g.by}</span>}
+                    <span className={`font-display text-[13px] tv:text-xl ${g.accent}`}>{g.name}</span>
+                    <span className="block text-[11px] tv:text-lg text-fog mt-1.5 leading-relaxed">{g.tagline}</span>
+                    {g.by && <span className="block text-[9px] tv:text-sm text-mint mt-1.5">made by @{g.by}</span>}
                     <span className="flex items-center justify-between mt-4">
-                      <span className="inline-flex items-center gap-2">
+                      <span className="inline-flex items-center gap-2 tv:gap-3">
                         {g.readBest ? (
                           <span className="inline-flex items-center gap-1.5 text-gold">
-                            <span className="text-[8px] font-display text-fog/70">BEST</span>
-                            <span className="font-display text-[11px] tabular-nums">{best}</span>
+                            <span className="text-[8px] tv:text-xs font-display text-fog/70">BEST</span>
+                            <span className="font-display text-[11px] tv:text-base tabular-nums">{best}</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 text-gold">
-                            <span className="text-[8px] font-display text-fog/70">COIN-OP</span>
-                            <span className="font-display text-[9px]">FREE PLAY</span>
+                            <span className="text-[8px] tv:text-xs font-display text-fog/70">COIN-OP</span>
+                            <span className="font-display text-[9px] tv:text-sm">FREE PLAY</span>
                           </span>
                         )}
                         <span className="inline-flex items-center gap-1 text-gold/80">
-                          <span className="text-[8px] font-display text-fog/70">TOYS</span>
-                          <span className="font-display text-[10px] tabular-nums">
+                          <span className="text-[8px] tv:text-xs font-display text-fog/70">TOYS</span>
+                          <span className="font-display text-[10px] tv:text-base tabular-nums">
                             {achv.unlocked.length}/{achv.total}
                           </span>
                         </span>
                       </span>
-                      <span className="inline-flex items-center gap-1 font-display text-[9px] text-lime group-hover:gap-2 transition-all">
+                      <span className="inline-flex items-center gap-1 font-display text-[9px] tv:text-sm text-lime group-hover:gap-2 group-focus:gap-2 transition-all">
                         PLAY <IconChevron rotate={-90} />
                       </span>
                     </span>
@@ -226,9 +308,19 @@ export default function Arcade() {
             })}
           </div>
 
-          <p className="text-[11px] text-fog/75 text-center leading-relaxed max-w-[520px]">
-            Arrows <span className="keycap">↑</span><span className="keycap">↓</span> + <span className="keycap">1</span>–{GAMES.length.toString()}{" "}
-            to pick · <span className="keycap">ENTER</span> to play · works offline, with controllers, no account needed
+          <p className="text-[11px] tv:text-lg text-fog/75 text-center leading-relaxed max-w-[520px] tv:max-w-[900px] text-pretty">
+            {tv ? (
+              <>
+                <span className="keycap">◀ ▲ ▼ ▶</span> pick a game · <span className="keycap">OK</span> play ·{" "}
+                <span className="keycap">BACK</span> return · works offline, no account needed
+              </>
+            ) : (
+              <>
+                Arrows <span className="keycap">↑</span><span className="keycap">↓</span><span className="keycap">←</span>
+                <span className="keycap">→</span> + <span className="keycap">1</span>–{GAMES.length.toString()} to pick ·{" "}
+                <span className="keycap">ENTER</span> to play · works offline, with controllers, no account needed
+              </>
+            )}
           </p>
         </main>
       )}

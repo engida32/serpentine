@@ -267,7 +267,7 @@ export function SnakeGame({
           className="flex items-center gap-2 bg-pit/90 border rounded-md px-3 py-2"
           style={{ borderColor: diffDef.color + "66" }}
         >
-          <span className="font-display text-[8px] tracking-wider" style={{ color: diffDef.color }}>
+          <span className="font-display text-[8px] tv:text-xs tracking-wider" style={{ color: diffDef.color }}>
             {diffDef.label}
           </span>
           <span className="font-display text-sm text-foam tabular-nums">×{hud.speed.toFixed(2)}</span>
@@ -310,20 +310,20 @@ export function SnakeGame({
                 <p className="font-display text-xl sm:text-2xl text-lime" style={{ textShadow: "0 0 24px rgba(163,245,90,0.6)" }}>
                   READY
                 </p>
-                <p className="text-fog text-xs mt-2 tracking-[0.3em] uppercase">get set…</p>
+                <p className="text-fog text-xs tv:text-lg mt-2 tracking-[0.3em] uppercase">get set…</p>
               </div>
             </div>
           )}
 
           {/* PAUSE overlay */}
           {hud.phase === "paused" && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 sm:gap-5 bg-[rgba(3,10,6,0.86)] animate-rise p-4">
+            <div data-menu className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 sm:gap-5 bg-[rgba(3,10,6,0.86)] animate-rise p-4">
               <p className="font-display text-lg sm:text-xl text-mint" style={{ textShadow: "0 0 20px rgba(61,220,132,0.5)" }}>
                 PAUSED
               </p>
-              <p className="text-fog text-sm -mt-2">The serpent waits in the grass…</p>
+              <p className="text-fog text-sm tv:text-xl -mt-2">The serpent waits in the grass…</p>
               <div className="flex flex-wrap items-center justify-center gap-2.5">
-                <ArcadeButton variant="primary" onClick={() => eng()?.togglePause()}>
+                <ArcadeButton variant="primary" data-autofocus onClick={() => eng()?.togglePause()}>
                   <IconPlay /> Resume
                 </ArcadeButton>
                 <ArcadeButton onClick={() => eng()?.restart()}>
@@ -333,7 +333,7 @@ export function SnakeGame({
                   <IconHome /> Quit
                 </ArcadeButton>
               </div>
-              <p className="text-[11px] text-fog/80 flex items-center gap-1.5">
+              <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
                 <span className="keycap">P</span> to resume
               </p>
             </div>
@@ -341,10 +341,10 @@ export function SnakeGame({
 
           {/* MENU overlay */}
           {hud.phase === "menu" && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.88)] animate-rise p-4 overflow-y-auto">
-              <p className="font-display text-[9px] text-gold tracking-widest animate-blink">— INSERT COIN —</p>
+            <div data-menu className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.88)] animate-rise p-4 overflow-y-auto">
+              <p className="font-display text-[9px] tv:text-sm text-gold tracking-widest animate-blink">— INSERT COIN —</p>
               <div className="w-full max-w-[300px]">
-                <p className="font-display text-[9px] text-fog text-center mb-2 tracking-wider">SELECT DIFFICULTY</p>
+                <p className="font-display text-[9px] tv:text-sm text-fog text-center mb-2 tracking-wider">SELECT DIFFICULTY</p>
                 <div className="flex flex-col gap-1.5">
                   {DIFFICULTIES.map((d, i) => {
                     const active = hud.difficulty === d.id;
@@ -369,10 +369,10 @@ export function SnakeGame({
                         </span>
                         <span className="flex-1 min-w-0">
                           <span className="flex items-center gap-2">
-                            <span className="font-display text-[10px]" style={{ color: d.color }}>
+                            <span className="font-display text-[10px] tv:text-base" style={{ color: d.color }}>
                               {d.label}
                             </span>
-                            <span className="hidden sm:inline text-[9px] text-fog/70 font-bold">{i + 1}</span>
+                            <span className="hidden sm:inline text-[9px] tv:text-sm text-fog/70 font-bold">{i + 1}</span>
                             <span className="flex gap-[3px] ml-auto sm:ml-0">
                               {[0, 1, 2].map((p) => (
                                 <span
@@ -383,11 +383,11 @@ export function SnakeGame({
                               ))}
                             </span>
                           </span>
-                          <span className="block text-[11px] text-fog truncate mt-0.5">{d.tagline}</span>
+                          <span className="block text-[11px] tv:text-lg text-fog truncate mt-0.5">{d.tagline}</span>
                         </span>
                         <span className="text-right shrink-0">
-                          <span className="block text-[8px] font-display text-fog/70">BEST</span>
-                          <span className="block font-display text-[10px] text-gold tabular-nums">
+                          <span className="block text-[8px] tv:text-xs font-display text-fog/70">BEST</span>
+                          <span className="block font-display text-[10px] tv:text-base text-gold tabular-nums">
                             {active ? hud.best : readBest(d.id)}
                           </span>
                         </span>
@@ -396,7 +396,7 @@ export function SnakeGame({
                   })}
                 </div>
               </div>
-              <ArcadeButton variant="primary" big onClick={() => eng()?.start()}>
+              <ArcadeButton variant="primary" data-autofocus big onClick={() => eng()?.start()}>
                 <IconPlay /> Start Run
               </ArcadeButton>
               <div className="flex flex-wrap items-center justify-center gap-2.5">
@@ -405,7 +405,7 @@ export function SnakeGame({
                 </ArcadeButton>
                 <ShareButton payload={{ game: "SERPENTINE", mode: DIFFICULTIES[1].label, score: hud.best }} />
               </div>
-              <p className="text-[11px] text-fog/85 text-center leading-relaxed">
+              <p className="text-[11px] tv:text-lg text-fog/85 text-center leading-relaxed">
                 {isCoarse ? (
                   <>Swipe the board or use the pad to steer · gamepad ready</>
                 ) : (
@@ -420,7 +420,7 @@ export function SnakeGame({
 
           {/* GAME OVER overlay */}
           {hud.phase === "over" && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.88)] animate-rise p-4 overflow-y-auto">
+            <div data-menu className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.88)] animate-rise p-4 overflow-y-auto">
               <p
                 className={`font-display text-lg sm:text-2xl ${hud.win ? "text-gold" : "text-coral"}`}
                 style={{ textShadow: hud.win ? "0 0 26px rgba(255,207,92,0.55)" : "0 0 26px rgba(255,98,87,0.5)" }}
@@ -430,35 +430,35 @@ export function SnakeGame({
               {hud.newBest ? (
                 <div className="flex items-center gap-2 bg-gold/15 border border-gold/60 rounded-md px-3 py-1.5 animate-crown">
                   <span className="text-gold"><IconCrown /></span>
-                  <span className="font-display text-[9px] text-gold tracking-wider animate-blink">NEW HIGH SCORE</span>
+                  <span className="font-display text-[9px] tv:text-sm text-gold tracking-wider animate-blink">NEW HIGH SCORE</span>
                 </div>
               ) : (
-                <p className="text-fog text-sm -mt-1">
+                <p className="text-fog text-sm tv:text-xl -mt-1">
                   {hud.foods >= 15 ? "So close — the apple was right there." : "The garden claims another serpent."}
                 </p>
               )}
               <div className="text-center">
-                <p className="font-display text-[8px] text-fog tracking-widest mb-1.5">SCORE</p>
+                <p className="font-display text-[8px] tv:text-xs text-fog tracking-widest mb-1.5">SCORE</p>
                 <p className="font-display text-3xl sm:text-4xl text-lime animate-pop" key={hud.score} style={{ textShadow: "0 0 30px rgba(163,245,90,0.4)" }}>
                   {hud.score}
                 </p>
               </div>
               <div className="flex items-center gap-2 text-center">
                 <div className="bg-pit/80 border border-line rounded-md px-3 py-2">
-                  <p className="text-[8px] font-display text-fog mb-1">BEST</p>
+                  <p className="text-[8px] tv:text-xs font-display text-fog mb-1">BEST</p>
                   <p className="font-display text-xs text-gold tabular-nums">{hud.best}</p>
                 </div>
                 <div className="bg-pit/80 border border-line rounded-md px-3 py-2">
-                  <p className="text-[8px] font-display text-fog mb-1">LENGTH</p>
+                  <p className="text-[8px] tv:text-xs font-display text-fog mb-1">LENGTH</p>
                   <p className="font-display text-xs text-mint tabular-nums">{hud.length}</p>
                 </div>
                 <div className="bg-pit/80 border border-line rounded-md px-3 py-2">
-                  <p className="text-[8px] font-display text-fog mb-1">APPLES</p>
+                  <p className="text-[8px] tv:text-xs font-display text-fog mb-1">APPLES</p>
                   <p className="font-display text-xs text-coral tabular-nums">{hud.foods}</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center justify-center gap-2.5">
-                <ArcadeButton variant="primary" big onClick={() => eng()?.start()}>
+                <ArcadeButton variant="primary" data-autofocus big onClick={() => eng()?.start()}>
                   <IconRestart /> Play Again
                 </ArcadeButton>
                 <ArcadeButton onClick={() => eng()?.toMenu()}>
@@ -470,7 +470,7 @@ export function SnakeGame({
               </div>
               <ShareButton payload={sharePayload} />
               {!isCoarse && (
-                <p className="text-[11px] text-fog/80 flex items-center gap-1.5">
+                <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
                   <span className="keycap">SPACE</span> retry · <span className="keycap">ESC</span> menu
                 </p>
               )}
@@ -514,7 +514,7 @@ export function SnakeGame({
         </div>
       ) : (
         <div className="shrink-0 pb-2 sm:pb-3 text-center">
-          <p className="text-[11px] text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
+          <p className="text-[11px] tv:text-lg text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
             <span className="keycap">↑</span><span className="keycap">↓</span><span className="keycap">←</span><span className="keycap">→</span>
             <span className="text-fog/60">or</span>
             <span className="keycap">WASD</span> steer
@@ -527,7 +527,7 @@ export function SnakeGame({
             <span className="text-line">·</span>
             <span className="keycap">F</span> fullscreen
           </p>
-          <p className="font-display text-[7px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
+          <p className="font-display text-[7px] tv:text-[11px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
             Eat · Grow · Survive
           </p>
         </div>

@@ -188,7 +188,7 @@ export function SweeperGame({
       if (lower === "f") return toggleFlag(eng()?.cursorX ?? 0, eng()?.cursorY ?? 0);
       if (lower === "r") return restart();
       if (lower === "m") return onMute();
-      if (e.key === "Escape" || lower === "goback" || e.keyCode === 461 || e.keyCode === 10009) onExit();
+      // Back is handled by useBackHandler.
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -249,7 +249,7 @@ export function SweeperGame({
           <span className="absolute inset-0 grid place-items-center text-coral"><IconMine className="w-[55%] h-[55%]" /></span>
         )}
         {!unrevealed && !c.mine && c.adj > 0 && (
-          <span className={`absolute inset-0 grid place-items-center font-display text-[9px] sm:text-[11px] tabular-nums ${NUM_COLOR[c.adj] ?? "text-foam"}`}>
+          <span className={`absolute inset-0 grid place-items-center font-display text-[9px] tv:text-sm sm:text-[11px] tv:text-lg tabular-nums ${NUM_COLOR[c.adj] ?? "text-foam"}`}>
             {c.adj}
           </span>
         )}
@@ -294,16 +294,16 @@ export function SweeperGame({
           <div className="absolute inset-0 board-vignette pointer-events-none z-10" />
 
           {phase === "idle" && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.9)] animate-rise p-4 overflow-y-auto">
+            <div data-menu className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.9)] animate-rise p-4 overflow-y-auto">
               <span className="text-gold"><IconMine /></span>
               <p className="font-display text-lg sm:text-xl text-gold" style={{ textShadow: "0 0 20px rgba(255,207,92,0.5)" }}>
                 SWEEPER
               </p>
-              <p className="text-fog text-sm text-center max-w-[280px] leading-relaxed">
+              <p className="text-fog text-sm tv:text-xl text-center max-w-[280px] leading-relaxed">
                 {MINES} mines, 9x9 field. One reveal is always safe — the rest is up to you.
               </p>
-              <ArcadeButton variant="primary" big onClick={restart}><IconRestart /> Play</ArcadeButton>
-              <p className="text-[11px] text-fog/80 flex items-center gap-1.5">
+              <ArcadeButton variant="primary" data-autofocus big onClick={restart}><IconRestart /> Play</ArcadeButton>
+              <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
                 {isCoarse ? (
                   <>Move with the pad, tap the centre to sweep, hold the flag button to mark</>
                 ) : (
@@ -314,7 +314,7 @@ export function SweeperGame({
           )}
 
           {(phase === "over" || phase === "win") && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.88)] animate-rise p-4 overflow-y-auto">
+            <div data-menu className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.88)] animate-rise p-4 overflow-y-auto">
               <p
                 className={`font-display text-lg sm:text-2xl ${phase === "win" ? "text-gold" : "text-coral"}`}
                 style={{
@@ -324,21 +324,21 @@ export function SweeperGame({
               >
                 {phase === "win" ? "FIELD CLEARED" : "MINE DETONATED"}
               </p>
-              <p className="text-fog text-sm -mt-1">
+              <p className="text-fog text-sm tv:text-xl -mt-1">
                 {phase === "win" ? `${secs}s flat.` : "You'll get it next sweep."}
               </p>
               <div className="flex items-center gap-2">
                 <div className="bg-pit/80 border border-line rounded-md px-3 py-2">
-                  <p className="text-[8px] font-display text-fog mb-1">TIME</p>
+                  <p className="text-[8px] tv:text-xs font-display text-fog mb-1">TIME</p>
                   <p className="font-display text-xs text-lime tabular-nums">{secs}s</p>
                 </div>
                 <div className="bg-pit/80 border border-line rounded-md px-3 py-2">
-                  <p className="text-[8px] font-display text-fog mb-1">BEST</p>
+                  <p className="text-[8px] tv:text-xs font-display text-fog mb-1">BEST</p>
                   <p className="font-display text-xs text-gold tabular-nums">{best > 0 ? `${best}s` : "—"}</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center justify-center gap-2.5">
-                <ArcadeButton variant="primary" big onClick={restart}><IconRestart /> Play Again</ArcadeButton>
+                <ArcadeButton variant="primary" data-autofocus big onClick={restart}><IconRestart /> Play Again</ArcadeButton>
                 <ArcadeButton onClick={onExit}><IconHome /> Menu</ArcadeButton>
               </div>
               <ShareButton payload={sharePayload} />
@@ -373,12 +373,12 @@ export function SweeperGame({
         </div>
       ) : (
         <div className="shrink-0 pb-2 sm:pb-3 text-center">
-          <p className="text-[11px] text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
+          <p className="text-[11px] tv:text-lg text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
             <span className="keycap">↑</span><span className="keycap">↓</span><span className="keycap">←</span><span className="keycap">→</span> move ·
             <span className="keycap">Enter</span> sweep · <span className="keycap">F</span> flag ·
             <span className="keycap">R</span> restart
           </p>
-          <p className="font-display text-[7px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
+          <p className="font-display text-[7px] tv:text-[11px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
             Sweep · Mark · Then pray
           </p>
         </div>

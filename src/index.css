@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* 10-foot UI: `.tv` is set on <html> for TV user agents / native shell. */
+@custom-variant tv (&:where(.tv, .tv *));
+
 @font-face {
   font-family: "Press Start 2P";
   font-style: normal;
@@ -152,10 +155,48 @@ body {
   background: rgba(163, 245, 90, 0.35);
 }
 
+/* rem-based spacing scales up ~25% on TV; px text sizes get explicit tv: overrides. */
+html.tv {
+  font-size: 20px;
+}
+html.tv .keycap {
+  font-size: 15px;
+  padding: 7px 10px;
+  min-width: 32px;
+  border-radius: 8px;
+}
+/* Remotes cannot reach these; they stay usable for pointer/touch users. */
+html.tv [data-pointer-only] {
+  display: none;
+}
+
 button:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--color-lime);
   outline-offset: 2px;
+}
+
+/*
+ * Inside a D-pad menu the focused control is THE selection indicator, so it
+ * must read from across the room: thick ring, glow and a slight lift.
+ */
+[data-menu] :is(button, a, [tabindex]):focus {
+  outline: 3px solid var(--color-lime);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 7px rgba(163, 245, 90, 0.18), 0 0 28px rgba(163, 245, 90, 0.35);
+  transform: translateY(-2px);
+  z-index: 1;
+}
+[data-menu] input:focus,
+[data-menu] textarea:focus {
+  outline: 3px solid var(--color-lime);
+  outline-offset: 2px;
+}
+.game-card:focus {
+  outline-color: var(--card-accent, var(--color-lime));
+  box-shadow: 0 0 0 7px color-mix(in srgb, var(--card-accent, var(--color-lime)) 20%, transparent),
+    0 0 32px color-mix(in srgb, var(--card-accent, var(--color-lime)) 40%, transparent);
+  transform: translateY(-3px) scale(1.02);
 }
 
 @media (prefers-reduced-motion: reduce) {

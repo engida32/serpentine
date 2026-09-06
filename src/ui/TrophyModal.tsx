@@ -52,8 +52,8 @@ export function TrophyModal({
             <span className="text-gold">
               <IconTrophy />
             </span>
-            <h2 className="font-display text-[9px] text-foam tracking-wider">TROPHIES</h2>
-            <span className="font-display text-[8px] text-lime tracking-wider">
+            <h2 className="font-display text-[9px] tv:text-sm text-foam tracking-wider">TROPHIES</h2>
+            <span className="font-display text-[8px] tv:text-xs text-lime tracking-wider">
               {trophyCount()}/{TROPHIES.length}
             </span>
           </div>
@@ -79,9 +79,9 @@ export function TrophyModal({
             const got = locker.filter((t) => have.has(t.id)).length;
             return (
               <section key={g.id}>
-                <p className="font-display text-[8px] text-fog tracking-wider mb-2">
+                <p className="font-display text-[8px] tv:text-xs text-fog tracking-wider mb-2">
                   {g.name.toUpperCase()}{" "}
-                  <span className="text-[9px] text-lime normal-case tracking-normal">
+                  <span className="text-[9px] tv:text-sm text-lime normal-case tracking-normal">
                     {got}/{locker.length}
                   </span>
                 </p>
@@ -100,11 +100,11 @@ export function TrophyModal({
                             unlocked ? "text-lime border-lime/50 bg-lime/15" : "text-fog/50 border-line/60"
                           }`}
                         >
-                          {unlocked ? <IconCheck /> : <span className="font-display text-[9px]">?</span>}
+                          {unlocked ? <IconCheck /> : <span className="font-display text-[9px] tv:text-sm">?</span>}
                         </span>
                         <span className="min-w-0">
                           <span className={`block font-bold text-[12px] ${unlocked ? "text-foam" : "text-fog"}`}>{t.name}</span>
-                          <span className="block text-[10px] text-fog/80">{t.hint}</span>
+                          <span className="block text-[10px] tv:text-base text-fog/80">{t.hint}</span>
                         </span>
                       </li>
                     );

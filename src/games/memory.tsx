@@ -181,7 +181,7 @@ export function MemoryGame({
       if (lower === "r") return restart();
       if (lower === "m") return onMute();
       if (lower === "f") return toggleFullscreen();
-      if (e.key === "Escape" || lower === "goback" || e.keyCode === 461 || e.keyCode === 10009) onExit();
+      // Back is handled by useBackHandler.
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -271,16 +271,16 @@ export function MemoryGame({
           <div className="absolute inset-0 board-vignette pointer-events-none z-10" />
 
           {phase === "idle" && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.9)] animate-rise p-4 overflow-y-auto">
+            <div data-menu className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.9)] animate-rise p-4 overflow-y-auto">
               <span className="text-lime"><IconMemory /></span>
               <p className="font-display text-lg sm:text-xl text-lime" style={{ textShadow: "0 0 20px rgba(163,245,90,0.5)" }}>
                 MEMORY
               </p>
-              <p className="text-fog text-sm text-center max-w-[280px] leading-relaxed">
+              <p className="text-fog text-sm tv:text-xl text-center max-w-[280px] leading-relaxed">
                 Eight pairs, hidden. Flip two, remember all, clear the board in the fewest moves.
               </p>
-              <ArcadeButton variant="primary" big onClick={restart}><IconRestart /> Play</ArcadeButton>
-              <p className="text-[11px] text-fog/80 flex items-center gap-1.5">
+              <ArcadeButton variant="primary" data-autofocus big onClick={restart}><IconRestart /> Play</ArcadeButton>
+              <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
                 {isCoarse ? (
                   <>Move with the pad, tap the centre to flip a card</>
                 ) : (
@@ -291,25 +291,25 @@ export function MemoryGame({
           )}
 
           {phase === "win" && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.88)] animate-rise p-4 overflow-y-auto">
+            <div data-menu className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.88)] animate-rise p-4 overflow-y-auto">
               <p className="font-display text-lg sm:text-2xl text-gold" style={{ textShadow: "0 0 26px rgba(255,207,92,0.55)" }}>
                 ALL PAIRS FOUND
               </p>
-              <p className="text-fog text-sm -mt-1">
+              <p className="text-fog text-sm tv:text-xl -mt-1">
                 {moves} moves{best > 0 && moves === best && moves > 0 ? " — new record!" : ""}
               </p>
               <div className="flex items-center gap-2">
                 <div className="bg-pit/80 border border-line rounded-md px-3 py-2">
-                  <p className="text-[8px] font-display text-fog mb-1">MOVES</p>
+                  <p className="text-[8px] tv:text-xs font-display text-fog mb-1">MOVES</p>
                   <p className="font-display text-xs text-lime tabular-nums">{moves}</p>
                 </div>
                 <div className="bg-pit/80 border border-line rounded-md px-3 py-2">
-                  <p className="text-[8px] font-display text-fog mb-1">BEST</p>
+                  <p className="text-[8px] tv:text-xs font-display text-fog mb-1">BEST</p>
                   <p className="font-display text-xs text-gold tabular-nums">{best > 0 ? best : "—"}</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center justify-center gap-2.5">
-                <ArcadeButton variant="primary" big onClick={restart}><IconRestart /> Play Again</ArcadeButton>
+                <ArcadeButton variant="primary" data-autofocus big onClick={restart}><IconRestart /> Play Again</ArcadeButton>
                 <ArcadeButton onClick={onExit}><IconHome /> Menu</ArcadeButton>
               </div>
               <ShareButton payload={sharePayload} />
@@ -340,12 +340,12 @@ export function MemoryGame({
         </div>
       ) : (
         <div className="shrink-0 pb-2 sm:pb-3 text-center">
-          <p className="text-[11px] text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
+          <p className="text-[11px] tv:text-lg text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
             <span className="keycap">↑</span><span className="keycap">↓</span><span className="keycap">←</span><span className="keycap">→</span> move ·
             <span className="keycap">Enter</span> flip · <span className="keycap">R</span> restart ·
             <span className="keycap">F</span> fullscreen
           </p>
-          <p className="font-display text-[7px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
+          <p className="font-display text-[7px] tv:text-[11px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
             Flip · Match · Recall
           </p>
         </div>

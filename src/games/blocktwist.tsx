@@ -52,7 +52,7 @@ function tileFont(v: number): string {
   if (v < 100) return "text-[22px] sm:text-[28px]";
   if (v < 1000) return "text-[18px] sm:text-[22px]";
   if (v < 10000) return "text-[14px] sm:text-[18px]";
-  return "text-[11px] sm:text-[14px]";
+  return "text-[11px] tv:text-lg sm:text-[14px]";
 }
 
 export function BlockGame({
@@ -327,34 +327,34 @@ export function BlockGame({
                 <p className="font-display text-lg sm:text-xl text-gold" style={{ textShadow: "0 0 24px rgba(255,207,92,0.6)" }}>
                   2048!
                 </p>
-                <p className="text-fog text-xs mt-2 tracking-[0.25em] uppercase">now keep going</p>
+                <p className="text-fog text-xs tv:text-lg mt-2 tracking-[0.25em] uppercase">now keep going</p>
               </div>
             </div>
           )}
 
           {/* GAME OVER overlay */}
           {phase === "over" && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.9)] animate-rise p-4 overflow-y-auto">
+            <div data-menu className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.9)] animate-rise p-4 overflow-y-auto">
               <p className="font-display text-lg sm:text-2xl text-coral" style={{ textShadow: "0 0 26px rgba(255,98,87,0.5)" }}>
                 NO MOVES LEFT
               </p>
-              <p className="text-fog text-sm -mt-1">The grid is packed.</p>
+              <p className="text-fog text-sm tv:text-xl -mt-1">The grid is packed.</p>
               <div className="flex items-center gap-2 text-center">
                 <div className="bg-pit/80 border border-line rounded-md px-3 py-2">
-                  <p className="text-[8px] font-display text-fog mb-1">NODE</p>
+                  <p className="text-[8px] tv:text-xs font-display text-fog mb-1">NODE</p>
                   <p className="font-display text-xs text-lime tabular-nums">{score}</p>
                 </div>
                 <div className="bg-pit/80 border border-line rounded-md px-3 py-2">
-                  <p className="text-[8px] font-display text-fog mb-1">BEST</p>
+                  <p className="text-[8px] tv:text-xs font-display text-fog mb-1">BEST</p>
                   <p className="font-display text-xs text-gold tabular-nums">{best}</p>
                 </div>
                 <div className="bg-pit/80 border border-line rounded-md px-3 py-2">
-                  <p className="text-[8px] font-display text-fog mb-1">MOVES</p>
+                  <p className="text-[8px] tv:text-xs font-display text-fog mb-1">MOVES</p>
                   <p className="font-display text-xs text-mint tabular-nums">{moves}</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center justify-center gap-2.5">
-                <ArcadeButton variant="primary" big onClick={restart}>
+                <ArcadeButton variant="primary" data-autofocus big onClick={restart}>
                   <IconRestart /> Play Again
                 </ArcadeButton>
                 <ArcadeButton onClick={onExit}>
@@ -397,7 +397,7 @@ export function BlockGame({
         </div>
       ) : (
         <div className="shrink-0 pb-2 sm:pb-3 text-center">
-          <p className="text-[11px] text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
+          <p className="text-[11px] tv:text-lg text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
             <span className="keycap">↑</span><span className="keycap">↓</span><span className="keycap">←</span><span className="keycap">→</span>
             <span className="text-fog/60">or</span>
             <span className="keycap">WASD</span> slide tiles
@@ -406,7 +406,7 @@ export function BlockGame({
             <span className="text-line">·</span>
             <span className="keycap">F</span> fullscreen
           </p>
-          <p className="font-display text-[7px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
+          <p className="font-display text-[7px] tv:text-[11px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
             Slide · Merge · Reach 2048
           </p>
         </div>

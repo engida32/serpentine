@@ -1,6 +1,8 @@
 import { sfx } from "../game/audio";
 import { IconChevron } from "./icons";
 
+type ButtonExtras = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "children" | "className" | "title" | "disabled" | "type">;
+
 export function ArcadeButton({
   children,
   onClick,
@@ -9,6 +11,7 @@ export function ArcadeButton({
   disabled = false,
   title,
   className = "",
+  ...rest
 }: {
   children: React.ReactNode;
   onClick: () => void;
@@ -17,7 +20,7 @@ export function ArcadeButton({
   disabled?: boolean;
   title?: string;
   className?: string;
-}) {
+} & ButtonExtras) {
   const styles: Record<string, string> = {
     primary: "bg-lime text-ink border-[#557f22] hover:bg-[#baff75]",
     gold: "bg-gold text-ink border-[#96700f] hover:bg-[#ffe08f]",
@@ -29,6 +32,7 @@ export function ArcadeButton({
       type="button"
       title={title}
       disabled={disabled}
+      {...rest}
       onClick={() => {
         sfx.unlock();
         sfx.click();
@@ -36,7 +40,7 @@ export function ArcadeButton({
       }}
       className={`
         font-display uppercase inline-flex items-center justify-center gap-2 select-none
-        ${big ? "text-[11px] px-6 py-4" : "text-[9px] px-3.5 py-2.5"}
+        ${big ? "text-[11px] tv:text-base px-6 py-4" : "text-[9px] tv:text-sm px-3.5 py-2.5"}
         rounded-md border-b-4 transition-all duration-100 active:translate-y-[3px] active:border-b-0
         disabled:opacity-35 disabled:pointer-events-none cursor-pointer
         ${styles[variant]} ${className}
@@ -53,19 +57,21 @@ export function IconBtn({
   disabled = false,
   children,
   className = "",
+  ...rest
 }: {
   onClick: () => void;
   title: string;
   disabled?: boolean;
   children: React.ReactNode;
   className?: string;
-}) {
+} & ButtonExtras) {
   return (
     <button
       type="button"
       title={title}
       aria-label={title}
       disabled={disabled}
+      {...rest}
       onClick={() => {
         sfx.unlock();
         sfx.click();
@@ -83,8 +89,8 @@ export function IconBtn({
 export function Stat({ label, children, accent }: { label: string; children: React.ReactNode; accent?: string }) {
   return (
     <div className="flex items-center gap-2 bg-pit/90 border border-line rounded-md px-3 py-2 min-w-0">
-      <span className="font-display text-[8px] text-fog tracking-wider">{label}</span>
-      <span className={`font-display text-sm sm:text-base tabular-nums ${accent ?? "text-foam"}`}>{children}</span>
+      <span className="font-display text-[8px] tv:text-xs text-fog tracking-wider">{label}</span>
+      <span className={`font-display text-sm sm:text-base tv:text-xl tabular-nums ${accent ?? "text-foam"}`}>{children}</span>
     </div>
   );
 }

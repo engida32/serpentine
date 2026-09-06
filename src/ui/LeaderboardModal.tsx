@@ -111,9 +111,9 @@ export function LeaderboardModal({
             <span className="text-gold">
               <IconTrophy />
             </span>
-            <h2 className="font-display text-[9px] text-foam tracking-wider">LEADERBOARD</h2>
+            <h2 className="font-display text-[9px] tv:text-sm text-foam tracking-wider">LEADERBOARD</h2>
             {label && (
-              <span className="font-display text-[8px] tracking-wider" style={{ color: labelColor }}>
+              <span className="font-display text-[8px] tv:text-xs tracking-wider" style={{ color: labelColor }}>
                 {label}
               </span>
             )}
@@ -143,7 +143,7 @@ export function LeaderboardModal({
                   sfx.click();
                   setMode(m);
                 }}
-                className={`px-2.5 py-1 rounded-md font-display text-[8px] tracking-wider border transition-colors ${
+                className={`px-2.5 py-1 rounded-md font-display text-[8px] tv:text-xs tracking-wider border transition-colors ${
                   mode === m ? "bg-moss text-lime border-lime/60" : "text-fog border-line/60 hover:text-foam"
                 }`}
               >
@@ -151,20 +151,20 @@ export function LeaderboardModal({
               </button>
             ))}
             {mode === "week" && (
-              <span className="ml-auto text-[8px] font-display text-fog/70 tracking-wider">{weekId()}</span>
+              <span className="ml-auto text-[8px] tv:text-xs font-display text-fog/70 tracking-wider">{weekId()}</span>
             )}
           </div>
 
           {!lbEnabled && (
-            <p className="text-[10px] text-fog/85 bg-moss/50 border border-line/70 rounded-md px-3 py-2 mb-3 leading-relaxed">
+            <p className="text-[10px] tv:text-base text-fog/85 bg-moss/50 border border-line/70 rounded-md px-3 py-2 mb-3 leading-relaxed">
               Offline rankings — scores are kept on this device. Connect Supabase (see README) to enable a global board.
             </p>
           )}
 
           {loading ? (
-            <p className="text-fog text-sm py-6 text-center animate-blink">LOADING…</p>
+            <p className="text-fog text-sm tv:text-xl py-6 text-center animate-blink">LOADING…</p>
           ) : rows.length === 0 ? (
-            <p className="text-fog text-sm py-6 text-center">
+            <p className="text-fog text-sm tv:text-xl py-6 text-center">
               {mode === "week" ? "No scores this week yet — be the first." : "No scores yet — be the first on the board."}
             </p>
           ) : (
@@ -179,14 +179,14 @@ export function LeaderboardModal({
                     }`}
                   >
                     <span
-                      className={`w-6 h-6 shrink-0 grid place-items-center rounded-md font-display text-[9px] tabular-nums ${rankBadge(i)}`}
+                      className={`w-6 h-6 shrink-0 grid place-items-center rounded-md font-display text-[9px] tv:text-sm tabular-nums ${rankBadge(i)}`}
                     >
                       {i + 1}
                     </span>
                     <span className="flex-1 min-w-0 truncate font-bold text-foam text-sm">{r.name}</span>
-                    {r.remote && <span className="text-[8px] font-display text-mint tracking-wider">LIVE</span>}
-                    {mine && <span className="text-[8px] font-display text-gold tracking-wider">YOU</span>}
-                    <span className="font-display text-[10px] text-lime tabular-nums">{r.score}</span>
+                    {r.remote && <span className="text-[8px] tv:text-xs font-display text-mint tracking-wider">LIVE</span>}
+                    {mine && <span className="text-[8px] tv:text-xs font-display text-gold tracking-wider">YOU</span>}
+                    <span className="font-display text-[10px] tv:text-base text-lime tabular-nums">{r.score}</span>
                   </li>
                 );
               })}
@@ -201,7 +201,7 @@ export function LeaderboardModal({
                 doSave();
               }}
             >
-              <label className="font-display text-[8px] text-fog tracking-wider" htmlFor="lb-name">
+              <label className="font-display text-[8px] tv:text-xs text-fog tracking-wider" htmlFor="lb-name">
                 SAVE YOUR SCORE — {myScore}
               </label>
               <div className="flex gap-2">
@@ -214,7 +214,7 @@ export function LeaderboardModal({
                   placeholder="NAME"
                   className="flex-1 min-w-0 bg-ink/70 border border-line rounded-md px-3 py-2 text-foam font-bold text-sm focus:outline-none focus:border-lime placeholder:text-fog/50"
                 />
-                <ArcadeButton variant="primary" onClick={doSave} className="shrink-0">
+                <ArcadeButton variant="primary" data-autofocus onClick={doSave} className="shrink-0">
                   Save
                 </ArcadeButton>
               </div>
@@ -222,7 +222,7 @@ export function LeaderboardModal({
           )}
 
           {saved && (
-            <p className="mt-3 pt-3 border-t border-line/60 font-display text-[9px] text-lime tracking-wider text-center animate-pop">
+            <p className="mt-3 pt-3 border-t border-line/60 font-display text-[9px] tv:text-sm text-lime tracking-wider text-center animate-pop">
               SCORE SAVED ✓
             </p>
           )}
