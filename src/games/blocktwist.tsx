@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import confetti from "canvas-confetti";
+import { burst } from "../ui/confetti";
 import { Blocks, BSIZE, type BTile, type BlockPhase } from "../game/block";
 import { sfx } from "../game/audio";
 import type { DirName } from "../game/engine";
@@ -107,7 +107,7 @@ export function BlockGame({
       sfx.record();
       for (let n = 0; n < 3; n++) {
         setTimeout(() => {
-          confetti({
+          burst({
             particleCount: 60,
             spread: 70,
             origin: { x: 0.5, y: 0.6 },

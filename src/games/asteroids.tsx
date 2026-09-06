@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Asteroids, type AstHud } from "../game/asteroids";
 import { sfx } from "../game/audio";
 import { ArcadeButton, HoldPad, IconBtn, Stat } from "../ui/controls";
-import { IconAsteroid, IconHome, IconRestart, IconSound } from "../ui/icons";
+import { IconAsteroid, IconHome, IconPause, IconPlay, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { useRemoteHeld } from "../ui/input";
 import { ShareButton } from "../ui/ShareButton";
+import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
 
@@ -37,6 +38,7 @@ export function AsteroidsGame({
 
   const [hud, setHud] = useState<AstHud>(INITIAL_HUD);
   const [boardSize, setBoardSize] = useState(320);
+  const [lbOpen, setLbOpen] = useState(false);
   const [isCoarse] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
   );
@@ -83,6 +85,7 @@ export function AsteroidsGame({
       if (lower === "r") return start();
       if (lower === "m") return onMute();
       if (lower === "f") return toggleFullscreen();
+      if (lower === "p") return g?.togglePause();
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         if (g && (g.phase === "idle" || g.phase === "over")) start();
@@ -122,6 +125,14 @@ export function AsteroidsGame({
           {"▲".repeat(Math.max(0, hud.lives))}
         </Stat>
         <div className="flex items-center gap-1.5">
+          <IconBtn
+            title={hud.phase === "paused" ? "Resume (P)" : "Pause (P)"}
+            disabled={hud.phase !== "playing" && hud.phase !== "paused"}
+            onClick={() => eng()?.togglePause()}
+          >
+            {hud.phase === "paused" ? <IconPlay /> : <IconPause />}
+          </IconBtn>
+          <IconBtn title="Leaderboard" onClick={() => setLbOpen(true)}><IconTrophy /></IconBtn>
           <IconBtn title="Restart (R)" onClick={start}><IconRestart /></IconBtn>
           <IconBtn title="Back to games (ESC)" onClick={onExit}><IconHome /></IconBtn>
         </div>
@@ -153,6 +164,23 @@ export function AsteroidsGame({
                 ) : (
                   <><span className="keycap">←</span><span className="keycap">→</span> turn · <span className="keycap">↑</span> thrust · <span className="keycap">Space</span> fire · <span className="keycap">Enter</span> to play</>
                 )}
+              </p>
+            </div>
+          )}
+
+          {hud.phase === "paused" && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.86)] animate-rise p-4">
+              <p className="font-display text-lg sm:text-xl text-foam" style={{ textShadow: "0 0 20px rgba(238,246,236,0.4)" }}>
+                PAUSED
+              </p>
+              <p className="text-fog text-sm -mt-1">The belt hangs still…</p>
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <ArcadeButton variant="primary" onClick={() => eng()?.togglePause()}><IconPlay /> Resume</ArcadeButton>
+                <ArcadeButton onClick={start}><IconRestart /> Restart</ArcadeButton>
+                <ArcadeButton onClick={onExit}><IconHome /> Menu</ArcadeButton>
+              </div>
+              <p className="text-[11px] text-fog/80 flex items-center gap-1.5">
+                <span className="keycap">P</span> to resume
               </p>
             </div>
           )}
@@ -196,13 +224,22 @@ export function AsteroidsGame({
           <p className="text-[11px] text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
             <span className="keycap">←</span><span className="keycap">→</span> turn · <span className="keycap">↑</span> thrust ·
             <span className="keycap">Space</span> fire · <span className="keycap">R</span> restart ·{" "}
-            <span className="keycap">F</span> fullscreen
+            <span className="keycap">P</span> pause · <span className="keycap">F</span> fullscreen
           </p>
           <p className="font-display text-[7px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
             Turn · Thrust · Fire
           </p>
         </div>
       )}
+
+      <LeaderboardModal
+        open={lbOpen}
+        onClose={() => setLbOpen(false)}
+        difficulty="asteroids"
+        label="ENDLESS"
+        labelColor="#eef6ec"
+        myScore={hud.phase === "over" ? hud.score : 0}
+      />
     </main>
   );
 }

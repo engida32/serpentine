@@ -1,7 +1,7 @@
 import { sfx } from "./audio";
 import type { Held } from "../ui/input";
 
-export type AstPhase = "idle" | "playing" | "over";
+export type AstPhase = "idle" | "playing" | "paused" | "over";
 export interface AstHud {
   phase: AstPhase;
   score: number;
@@ -68,6 +68,7 @@ export class Asteroids {
   private ship = { x: 0, y: 0, vx: 0, vy: 0, ang: -Math.PI / 2 };
   private invuln = 0;
   private fireCd = 0;
+  private resumeTo: "playing" | null = null;
   private rocks: Rock[] = [];
   private bullets: Bullet[] = [];
   private stars: { x: number; y: number; s: number }[] = [];
@@ -123,8 +124,47 @@ export class Asteroids {
     this.invuln = 0;
     for (let i = 0; i < 3; i++) this.spawnRock(rand(0.6, 0.95), null);
     this.phase = "playing";
+    this.resumeTo = null;
     sfx.go();
     this.emit();
+  }
+
+  togglePause() {
+    if (this.phase === "paused") {
+      this.phase = this.resumeTo ?? "playing";
+      this.resumeTo = null;
+      sfx.resume();
+      this.emit();
+      return;
+    }
+    if (this.phase === "playing") {
+      this.resumeTo = "playing";
+      this.phase = "paused";
+      sfx.pause();
+      this.emit();
+    }
+  }
+
+  private safeSpawn(): { x: number; y: number } {
+    const margin = SHIP_R + 16;
+    let sx = this.W / 2;
+    let sy = this.H / 2;
+    for (let attempt = 0; attempt < 16; attempt++) {
+      let safe = true;
+      for (const r of this.rocks) {
+        const dx = sx - r.x;
+        const dy = sy - r.y;
+        if (dx * dx + dy * dy < (r.r + margin) ** 2) {
+          safe = false;
+          // drift toward the corner opposite the offending rock, halving each pass
+          sx = (sx + (r.x > sx ? this.W * 0.2 : this.W * 0.8)) / 2;
+          sy = (sy + (r.y > sy ? this.H * 0.2 : this.H * 0.8)) / 2;
+          break;
+        }
+      }
+      if (safe) break;
+    }
+    return { x: sx, y: sy };
   }
 
   private spawnRock(r: number, at: { x: number; y: number } | null) {
@@ -169,10 +209,9 @@ export class Asteroids {
   private update(dt: number) {
     const { W, H } = this;
     if (W <= 0 || H <= 0) return;
+    if (this.phase !== "playing") return;
     const held = this.input.current;
     this.invuln = Math.max(0, this.invuln - dt);
-
-    if (this.phase !== "playing") return;
 
     // ship control
     const s = this.ship;
@@ -237,14 +276,15 @@ export class Asteroids {
     }
 
     // ship vs rocks
-    if (this.invuln <= 0) {
-      for (let j = 0; j < this.rocks.length; j++) {
-        const r = this.rocks[j];
-        if ((s.x - r.x) ** 2 + (s.y - r.y) ** 2 < (SHIP_R + r.r) ** 2) {
-          this.lives -= 1;
-          this.invuln = 1600;
-          this.ship = { x: W / 2, y: H / 2, vx: 0, vy: 0, ang: -Math.PI / 2 };
-          sfx.boom();
+if (this.invuln <= 0) {
+        for (let j = 0; j < this.rocks.length; j++) {
+          const r = this.rocks[j];
+          if ((s.x - r.x) ** 2 + (s.y - r.y) ** 2 < (SHIP_R + r.r) ** 2) {
+            this.lives -= 1;
+            this.invuln = 1600;
+            const spawn = this.safeSpawn();
+            this.ship = { x: spawn.x, y: spawn.y, vx: 0, vy: 0, ang: -Math.PI / 2 };
+            sfx.boom();
           if (this.lives <= 0) {
             this.phase = "over";
             if (this.score > this.best) this.best = this.score;

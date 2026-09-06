@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import confetti from "canvas-confetti";
 import { Sweeper, MINES, MSIZE, type SweepPhase, type MineCell } from "../game/minesweeper";
 import { sfx } from "../game/audio";
+import { burst } from "../ui/confetti";
 import type { DirName } from "../game/engine";
 import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
-import { IconChevron, IconFlag, IconHome, IconMine, IconRestart, IconSound } from "../ui/icons";
+import { IconChevron, IconFlag, IconHome, IconMine, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { useGamepad } from "../ui/input";
 import { ShareButton } from "../ui/ShareButton";
+import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
 
@@ -47,6 +48,7 @@ export function SweeperGame({
   const [flags, setFlags] = useState(0);
   const [best, setBest] = useState(readBest);
   const [boardSize, setBoardSize] = useState(320);
+  const [lbOpen, setLbOpen] = useState(false);
   const [isCoarse] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
   );
@@ -103,7 +105,7 @@ export function SweeperGame({
         }
       }
       sfx.record();
-      confetti({
+      burst({
         particleCount: 110,
         spread: 80,
         origin: { x: 0.5, y: 0.6 },
@@ -256,6 +258,7 @@ export function SweeperGame({
         <Stat label="MINES" accent="text-gold">{Math.max(0, MINES - flags)}</Stat>
         <Stat label="BEST" accent="text-mint">{best > 0 ? `${best}s` : "—"}</Stat>
         <div className="flex items-center gap-1.5">
+          <IconBtn title="Leaderboard" onClick={() => setLbOpen(true)}><IconTrophy /></IconBtn>
           <IconBtn title="Restart (R)" onClick={restart}><IconRestart /></IconBtn>
           <IconBtn title="Back to games (ESC)" onClick={onExit}><IconHome /></IconBtn>
         </div>
@@ -369,6 +372,16 @@ export function SweeperGame({
           </p>
         </div>
       )}
+
+      <LeaderboardModal
+        open={lbOpen}
+        onClose={() => setLbOpen(false)}
+        difficulty="sweeper"
+        label="9X9 · 10 MINES"
+        labelColor="#ffcf5c"
+        ascending
+        myScore={phase === "win" ? secs : 0}
+      />
     </main>
   );
 }

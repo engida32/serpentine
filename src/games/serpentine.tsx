@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import confetti from "canvas-confetti";
+import { burst } from "../ui/confetti";
 import {
   DIFFICULTIES,
   SnakeEngine,
@@ -187,7 +187,7 @@ export function SnakeGame({
     if (hud.win && hud.phase === "over") {
       const bursts = (n: number) => {
         if (n <= 0) return;
-        confetti({
+        burst({
           particleCount: 70,
           spread: 75,
           origin: { x: 0.5, y: 0.6 },

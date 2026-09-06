@@ -13,11 +13,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["fonts/*.woff2", "icons/*.svg"],
+      includeAssets: ["fonts/*.woff2", "icons/*.svg", "icons/*.png"],
       manifest: {
         name: "Serpentine Arcade",
         short_name: "Serpentine",
-        description: "Serpentine & Block Twist — retro arcade games.",
+        description: "Eight playable arcade classics in one browser — Snake, Block Twist, Breakout, Invaders, Pong, Asteroids, Minesweeper and Memory.",
         lang: "en",
         display: "fullscreen",
         start_url: ".",
@@ -25,12 +25,13 @@ export default defineConfig({
         theme_color: "#06110c",
         background_color: "#06110c",
         icons: [
-          { src: "icons/icon-512.svg", sizes: "512x512", type: "image/svg+xml", purpose: "any" },
+          { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
           { src: "icons/icon-512.svg", sizes: "512x512", type: "image/svg+xml", purpose: "maskable" },
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,woff2,svg}"],
+        globPatterns: ["**/*.{js,css,html,woff2,svg,png}"],
         navigateFallback: `${base}index.html`,
         navigateFallbackDenylist: [/sw\.js$/, /manifest\.webmanifest$/],
       },

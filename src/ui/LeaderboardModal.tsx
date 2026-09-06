@@ -26,6 +26,7 @@ export function LeaderboardModal({
   label,
   labelColor = "#a3f55a",
   myScore = 0,
+  ascending = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -33,6 +34,7 @@ export function LeaderboardModal({
   label?: string;
   labelColor?: string;
   myScore?: number;
+  ascending?: boolean;
 }) {
   const [rows, setRows] = useState<BoardEntry[]>([]);
   const [name, setName] = useState(getPlayerName());
@@ -45,7 +47,7 @@ export function LeaderboardModal({
     setSaved(false);
     setLoading(true);
     let live = true;
-    fetchBoard(difficulty).then((r) => {
+    fetchBoard(difficulty, ascending).then((r) => {
       if (!live) return;
       setRows(r);
       setLoading(false);
@@ -53,7 +55,7 @@ export function LeaderboardModal({
     return () => {
       live = false;
     };
-  }, [open, difficulty, saved]);
+  }, [open, difficulty, saved, ascending]);
 
   if (!open) return null;
 

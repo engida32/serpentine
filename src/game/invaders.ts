@@ -1,7 +1,7 @@
 import { sfx } from "./audio";
 import type { Held } from "../ui/input";
 
-export type InvPhase = "idle" | "playing" | "over" | "win";
+export type InvPhase = "idle" | "playing" | "paused" | "over" | "win";
 export interface InvHud {
   phase: InvPhase;
   score: number;
@@ -53,6 +53,7 @@ export class Invaders {
   private bullets: InvBullet[] = [];
   private fireCd = 0;
   private hitFlash = 0;
+  private resumeTo: "playing" | null = null;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -103,8 +104,25 @@ export class Invaders {
     this.phase = "playing";
     this.fireCd = 400;
     this.stepT = 0;
+    this.resumeTo = null;
     sfx.go();
     this.emit();
+  }
+
+  togglePause() {
+    if (this.phase === "paused") {
+      this.phase = this.resumeTo ?? "playing";
+      this.resumeTo = null;
+      sfx.resume();
+      this.emit();
+      return;
+    }
+    if (this.phase === "playing") {
+      this.resumeTo = "playing";
+      this.phase = "paused";
+      sfx.pause();
+      this.emit();
+    }
   }
 
   private emit() {
@@ -156,8 +174,10 @@ export class Invaders {
     // invader movement
     this.stepT -= dt;
     const { iw, ih, x0, y0 } = this.cellMetrics();
-    const incr = 1.04 - this.aliveCount() / (ROWS * COLS); // 0.04 .. 1.04
-    const period = 420 + 720 * incr;
+    // classic curve: the march accelerates as the fleet thins.
+    // 450ms step at full fleet → ~205ms with a single straggler.
+    const ratio = this.aliveCount() / (ROWS * COLS);
+    const period = 200 + 250 * ratio;
     if (this.stepT <= 0) {
       this.stepT = period;
       const liveCols = new Set<number>();

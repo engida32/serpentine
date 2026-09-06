@@ -83,10 +83,13 @@ export async function submitScore(name: string, difficulty: string, score: numbe
   }
 }
 
-function dedupeMerge(entries: BoardEntry[]): BoardEntry[] {
+function dedupeMerge(entries: BoardEntry[], asc = false): BoardEntry[] {
   const seen = new Set<string>();
   const out: BoardEntry[] = [];
-  for (const e of [...entries].sort((a, b) => b.score - a.score || a.ts - b.ts)) {
+  const cmp = asc
+    ? (a: BoardEntry, b: BoardEntry) => a.score - b.score || a.ts - b.ts
+    : (a: BoardEntry, b: BoardEntry) => b.score - a.score || a.ts - b.ts;
+  for (const e of [...entries].sort(cmp)) {
     const key = `${e.name}:${e.score}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -96,17 +99,17 @@ function dedupeMerge(entries: BoardEntry[]): BoardEntry[] {
   return out;
 }
 
-export async function fetchBoard(difficulty: string): Promise<BoardEntry[]> {
+export async function fetchBoard(difficulty: string, asc = false): Promise<BoardEntry[]> {
   const local = loadLocal().filter((e) => e.difficulty === difficulty);
   if (!client) {
-    return dedupeMerge(local.map((e) => ({ ...e, remote: false })));
+    return dedupeMerge(local.map((e) => ({ ...e, remote: false })), asc);
   }
   try {
     const { data, error } = await client
       .from("scores")
       .select("name, score, created_at")
       .eq("difficulty", difficulty)
-      .order("score", { ascending: false })
+      .order("score", { ascending: asc })
       .limit(BOARD_SIZE);
     if (error) throw error;
     const remote = ((data ?? []) as { name: string; score: number; created_at?: string }[]).map((r) => ({
@@ -116,8 +119,8 @@ export async function fetchBoard(difficulty: string): Promise<BoardEntry[]> {
       ts: r.created_at ? new Date(r.created_at).getTime() : 0,
       remote: true,
     }));
-    return dedupeMerge([...remote, ...local]);
+    return dedupeMerge([...remote, ...local], asc);
   } catch {
-    return dedupeMerge(local.map((e) => ({ ...e, remote: false })));
+    return dedupeMerge(local.map((e) => ({ ...e, remote: false })), asc);
   }
 }

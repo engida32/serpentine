@@ -1,6 +1,6 @@
 import { sfx } from "./audio";
 
-export type PongPhase = "idle" | "serve" | "playing" | "over";
+export type PongPhase = "idle" | "serve" | "playing" | "paused" | "over";
 export interface PongHud {
   phase: PongPhase;
   l: number;
@@ -48,6 +48,7 @@ export class PongEngine {
   private aiErrT = 0;
   private serveT = 0;
   private flash = 0;
+  private resumeTo: "serve" | "playing" | null = null;
 
   constructor(canvas: HTMLCanvasElement, onHud: (h: PongHud) => void) {
     this.canvas = canvas;
@@ -98,7 +99,24 @@ export class PongEngine {
     this.l = 0;
     this.r = 0;
     this.winner = null;
+    this.resumeTo = null;
     this.beginServe();
+  }
+
+  togglePause() {
+    if (this.phase === "paused") {
+      this.phase = this.resumeTo ?? "playing";
+      this.resumeTo = null;
+      sfx.resume();
+      this.emit();
+      return;
+    }
+    if (this.phase === "serve" || this.phase === "playing") {
+      this.resumeTo = this.phase;
+      this.phase = "paused";
+      sfx.pause();
+      this.emit();
+    }
   }
 
   getPhase() {
@@ -144,6 +162,7 @@ export class PongEngine {
     const W = this.cssW;
     const H = this.cssH;
     if (W <= 0 || H <= 0) return;
+    if (this.phase === "paused") return;
 
     this.flash = Math.max(0, this.flash - dt / 500);
 

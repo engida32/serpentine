@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import confetti from "canvas-confetti";
 import { PongEngine, POINT_TARGET, type PongHud } from "../game/pong";
 import { sfx } from "../game/audio";
+import { burst } from "../ui/confetti";
 import { ArcadeButton, IconBtn, Stat } from "../ui/controls";
-import { IconChevron, IconHome, IconPong, IconRestart, IconSound } from "../ui/icons";
+import { IconChevron, IconHome, IconPause, IconPlay, IconPong, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { ShareButton } from "../ui/ShareButton";
+import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
 
@@ -71,6 +72,7 @@ export function PongGame({
 
   const [hud, setHud] = useState<PongHud>(INITIAL_HUD);
   const [boardSize, setBoardSize] = useState(320);
+  const [lbOpen, setLbOpen] = useState(false);
   const [isCoarse] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
   );
@@ -115,6 +117,7 @@ export function PongGame({
       if (lower === "r") return eng()?.start();
       if (lower === "m") return onMute();
       if (lower === "f") return toggleFullscreen();
+      if (lower === "p") return eng()?.togglePause();
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         const ph = eng()?.getPhase();
@@ -168,7 +171,7 @@ export function PongGame({
     if (hud.phase === "over" && hud.winner === 0) {
       for (let n = 0; n < 3; n++) {
         setTimeout(() => {
-          confetti({
+          burst({
             particleCount: 70,
             spread: 75,
             origin: { x: 0.5, y: 0.6 },
@@ -219,6 +222,14 @@ export function PongGame({
           <span className="font-display text-sm text-gold tabular-nums">{POINT_TARGET}</span>
         </div>
         <div className="flex items-center gap-1.5">
+          <IconBtn
+            title={hud.phase === "paused" ? "Resume (P)" : "Pause (P)"}
+            disabled={hud.phase !== "serve" && hud.phase !== "playing" && hud.phase !== "paused"}
+            onClick={() => eng()?.togglePause()}
+          >
+            {hud.phase === "paused" ? <IconPlay /> : <IconPause />}
+          </IconBtn>
+          <IconBtn title="Leaderboard" onClick={() => setLbOpen(true)}><IconTrophy /></IconBtn>
           <IconBtn title="Restart (R)" onClick={() => eng()?.start()}>
             <IconRestart />
           </IconBtn>
@@ -278,6 +289,24 @@ export function PongGame({
                     <span className="keycap">Enter</span> to play
                   </>
                 )}
+              </p>
+            </div>
+          )}
+
+          {/* PAUSED */}
+          {hud.phase === "paused" && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 sm:gap-4 bg-[rgba(3,10,6,0.86)] animate-rise p-4">
+              <p className="font-display text-lg sm:text-xl text-mint" style={{ textShadow: "0 0 20px rgba(61,220,132,0.5)" }}>
+                PAUSED
+              </p>
+              <p className="text-fog text-sm -mt-1">The ghost gets nervous…</p>
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <ArcadeButton variant="primary" onClick={() => eng()?.togglePause()}><IconPlay /> Resume</ArcadeButton>
+                <ArcadeButton onClick={() => eng()?.start()}><IconRestart /> Restart</ArcadeButton>
+                <ArcadeButton onClick={onExit}><IconHome /> Menu</ArcadeButton>
+              </div>
+              <p className="text-[11px] text-fog/80 flex items-center gap-1.5">
+                <span className="keycap">P</span> to resume
               </p>
             </div>
           )}
@@ -343,13 +372,23 @@ export function PongGame({
           <p className="text-[11px] text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
             Hold <span className="keycap">↑</span><span className="keycap">↓</span> or{" "}
             <span className="keycap">W</span><span className="keycap">S</span> to move ·{" "}
-            <span className="keycap">R</span> restart · <span className="keycap">F</span> fullscreen
+            <span className="keycap">R</span> restart · <span className="keycap">P</span> pause ·{" "}
+            <span className="keycap">F</span> fullscreen
           </p>
           <p className="font-display text-[7px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
             First to {POINT_TARGET} · Return · Repeat
           </p>
         </div>
       )}
+
+      <LeaderboardModal
+        open={lbOpen}
+        onClose={() => setLbOpen(false)}
+        difficulty="pong"
+        label="VS GHOST"
+        labelColor="#ff6257"
+        myScore={hud.phase === "over" ? hud.l : 0}
+      />
     </main>
   );
 }

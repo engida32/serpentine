@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import confetti from "canvas-confetti";
 import { Memory, MCOL, MROW, SYMBOLS, type MemPhase } from "../game/memory";
 import { sfx } from "../game/audio";
+import { burst } from "../ui/confetti";
 import type { DirName } from "../game/engine";
 import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
-import { IconChevron, IconHome, IconMemory, IconQuestion, IconRestart, IconSound } from "../ui/icons";
+import { IconChevron, IconHome, IconMemory, IconQuestion, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { useGamepad } from "../ui/input";
 import { ShareButton } from "../ui/ShareButton";
+import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
 
@@ -41,6 +42,7 @@ export function MemoryGame({
   const [moves, setMoves] = useState(0);
   const [best, setBest] = useState(readBest);
   const [boardSize, setBoardSize] = useState(320);
+  const [lbOpen, setLbOpen] = useState(false);
   const [isCoarse] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
   );
@@ -85,7 +87,7 @@ export function MemoryGame({
         }
       }
       sfx.record();
-      confetti({
+      burst({
         particleCount: 110,
         spread: 80,
         origin: { x: 0.5, y: 0.6 },
@@ -236,6 +238,7 @@ export function MemoryGame({
         <Stat label="PAIRS" accent="text-gold">{grid.filter((t) => t.matched).length} / 8</Stat>
         <Stat label="BEST" accent="text-mint">{best > 0 ? best : "—"}</Stat>
         <div className="flex items-center gap-1.5">
+          <IconBtn title="Leaderboard" onClick={() => setLbOpen(true)}><IconTrophy /></IconBtn>
           <IconBtn title="Restart (R)" onClick={restart}><IconRestart /></IconBtn>
           <IconBtn title="Back to games (ESC)" onClick={onExit}><IconHome /></IconBtn>
         </div>
@@ -335,6 +338,16 @@ export function MemoryGame({
           </p>
         </div>
       )}
+
+      <LeaderboardModal
+        open={lbOpen}
+        onClose={() => setLbOpen(false)}
+        difficulty="memory"
+        label="4X4 MATCH"
+        labelColor="#a3f55a"
+        ascending
+        myScore={phase === "win" ? moves : 0}
+      />
     </main>
   );
 }

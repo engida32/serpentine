@@ -1,7 +1,7 @@
 import { sfx } from "./audio";
 import type { Held } from "../ui/input";
 
-export type BreakPhase = "idle" | "serve" | "playing" | "over" | "win";
+export type BreakPhase = "idle" | "serve" | "playing" | "paused" | "over" | "win";
 export interface BreakHud {
   phase: BreakPhase;
   score: number;
@@ -45,6 +45,7 @@ export class Breakout {
   private bricks: boolean[] = new Array(BCOLS * BROW5).fill(true);
   private serveT = 0;
   private flash = 0;
+  private resumeTo: "serve" | "playing" | null = null;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -98,7 +99,24 @@ export class Breakout {
     this.score = 0;
     this.lives = 3;
     this.bricks = new Array(BCOLS * BROW5).fill(true);
+    this.resumeTo = null;
     this.serve();
+  }
+
+  togglePause() {
+    if (this.phase === "paused") {
+      this.phase = this.resumeTo ?? "playing";
+      this.resumeTo = null;
+      sfx.resume();
+      this.emit();
+      return;
+    }
+    if (this.phase === "serve" || this.phase === "playing") {
+      this.resumeTo = this.phase;
+      this.phase = "paused";
+      sfx.pause();
+      this.emit();
+    }
   }
 
   private serve() {
@@ -150,6 +168,7 @@ export class Breakout {
   private update(dt: number) {
     const { W, H } = this;
     if (W <= 0 || H <= 0) return;
+    if (this.phase === "paused") return;
     const held = this.input.current;
     this.flash = Math.max(0, this.flash - dt / 500);
 
@@ -223,7 +242,7 @@ export class Breakout {
         if (dx * dx + dy * dy <= BALL_R * BALL_R) {
           this.bricks[i] = false;
           this.score += ROW_VALUE[r];
-          if (flipVertical(dy, dx)) this.ball.vy *= -1;
+          if (isVerticalReflection(dy, dx)) this.ball.vy *= -1;
           else this.ball.vx *= -1;
           this.ball.y = clamp(this.ball.y, br.y - BALL_R, br.y + br.h + BALL_R);
           sfx.merge();
@@ -313,6 +332,6 @@ export class Breakout {
   }
 }
 
-function flipVertical(dy: number, dx: number): boolean {
+function isVerticalReflection(dy: number, dx: number): boolean {
   return Math.abs(dy) >= Math.abs(dx);
 }
