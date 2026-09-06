@@ -117,6 +117,20 @@ body {
   background: radial-gradient(ellipse 120% 120% at 50% 45%, transparent 55%, rgba(2, 8, 5, 0.55) 100%);
 }
 
+.tile-anim {
+  transition: transform 110ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  will-change: transform;
+}
+
+.tile-anim > div {
+  animation: tilepop 0.16s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+@keyframes tilepop {
+  0% { transform: scale(0.72); }
+  100% { transform: scale(1); }
+}
+
 .keycap {
   font-family: var(--font-body);
   font-weight: 700;
