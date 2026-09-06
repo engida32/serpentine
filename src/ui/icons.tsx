@@ -131,8 +131,8 @@ export const IconAsteroid = () => (
   </svg>
 );
 
-export const IconMine = () => (
-  <svg className={ic} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+export const IconMine = ({ className = ic }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
     <circle cx="8" cy="8" r="4" opacity="0.8" />
     <circle cx="8" cy="8" r="1.4" fill="#0a1e15" opacity="0.7" />
     <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4" stroke="currentColor" strokeWidth="1" opacity="0.7" />
@@ -144,6 +144,13 @@ export const IconMemory = () => (
     <rect x="1.5" y="2" width="5.5" height="8" rx="1" fill="currentColor" opacity="0.55" />
     <rect x="9" y="2" width="5.5" height="8" rx="1" fill="currentColor" opacity="0.85" />
     <path d="M3.5 13.5h2.5M10 13.5h2.5" stroke="currentColor" strokeWidth="0.8" opacity="0.5" />
+  </svg>
+);
+
+export const IconFlag = ({ className = ic }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 16 16" aria-hidden>
+    <path d="M4.5 1.5v14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
+    <path d="M4.5 2.5C7.2 2 8.6 3.2 11 2.8c-1.2 2.2-1.2 4.4-.2 6.4-2.4-.4-4 .6-6.3-1.4z" fill="currentColor" />
   </svg>
 );
 
