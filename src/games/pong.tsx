@@ -4,6 +4,7 @@ import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
 import { burst } from "../ui/confetti";
 import { ArcadeButton, IconBtn, Stat } from "../ui/controls";
+import { isTypingTarget } from "../ui/input";
 import { IconChevron, IconHome, IconPause, IconPlay, IconPong, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { ShareButton } from "../ui/ShareButton";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
@@ -120,6 +121,7 @@ export function PongGame({
   /* keyboard: held directions + shortcuts */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(e)) return;
       sfx.unlock();
       pressedRef.current.add(e.key);
       if (UP_KEYS.has(e.key) || DOWN_KEYS.has(e.key)) e.preventDefault();

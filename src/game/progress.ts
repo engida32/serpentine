@@ -51,6 +51,23 @@ function writeArr(key: string, arr: string[]) {
   }
 }
 
+function readNum(key: string): number {
+  try {
+    const n = Number(localStorage.getItem(key) ?? 0);
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeNum(key: string, v: number) {
+  try {
+    localStorage.setItem(key, String(v));
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 export function unlockedTrophies(): string[] {
   return readArr(TROPHY_KEY);
 }
@@ -76,23 +93,17 @@ export function trophiesForGame(game: string): { total: number; unlocked: string
 }
 
 export function gamesPlayed(): number {
-  return readArr(PLAYED_KEY).length;
+  return readNum(PLAYED_KEY);
 }
 
 export function totalPoints(): number {
-  const raw = readArr(POINTS_KEY);
-  let n = 0;
-  for (const v of raw) {
-    const x = Number(v);
-    if (Number.isFinite(x) && x > 0) n += x;
-  }
-  return n;
+  return readNum(POINTS_KEY);
 }
 
 export function recordPlay(points: number): void {
-  writeArr(PLAYED_KEY, [...readArr(PLAYED_KEY), String(Date.now())]);
+  writeNum(PLAYED_KEY, gamesPlayed() + 1);
   if (points > 0) {
-    writeArr(POINTS_KEY, [...readArr(POINTS_KEY), String(Math.round(points))]);
+    writeNum(POINTS_KEY, totalPoints() + Math.round(points));
   }
 }
 

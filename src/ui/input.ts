@@ -84,6 +84,13 @@ export function autoTvMode(): boolean {
   return coarse && ratio >= 1.45 && window.innerWidth >= 900;
 }
 
+/** True when the event originated from an editable field (e.g. the leaderboard name input). */
+export function isTypingTarget(e: { target: EventTarget | null }): boolean {
+  const el = e.target;
+  if (!(el instanceof HTMLElement)) return false;
+  return el.closest("input, textarea, select, [contenteditable='true']") !== null;
+}
+
 export interface Held {
   up: boolean;
   down: boolean;
@@ -131,6 +138,7 @@ export function useRemoteHeld(): {
       return null;
     };
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(e)) return;
       sfx.unlock();
       const dir = dirOf(e.key);
       if (dir) {
@@ -144,6 +152,7 @@ export function useRemoteHeld(): {
       }
     };
     const onUp = (e: KeyboardEvent) => {
+      if (isTypingTarget(e)) return;
       const dir = dirOf(e.key);
       if (dir) manual.current[dir] = false;
     };

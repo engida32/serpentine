@@ -5,7 +5,7 @@ import { gamesPlayed, TROPHIES, totalPoints, trophiesForGame, trophyCount } from
 import { IconBtn } from "./ui/controls";
 import { IconChevron, IconMinimize, IconExpand, IconSound, IconTrophy, LogoMark } from "./ui/icons";
 import { useFullscreen } from "./ui/fullscreen";
-import { useGamepad } from "./ui/input";
+import { isTypingTarget, useGamepad } from "./ui/input";
 import { TrophyModal } from "./ui/TrophyModal";
 
 type GameId = GameDef["id"];
@@ -47,6 +47,11 @@ export default function Arcade() {
   useEffect(() => {
     if (gameId !== null) return;
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(e)) return;
+      if (trophyOpen) {
+        if (e.key === "Escape") setTrophyOpen(false);
+        return;
+      }
       sfx.unlock();
       const lower = e.key.toLowerCase();
       if (lower === "m") return onMute();
@@ -71,18 +76,18 @@ export default function Arcade() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameId, sel]);
+  }, [gameId, sel, trophyOpen]);
 
   useGamepad({
     onDir: (d) => {
-      if (gameId !== null) return;
+      if (gameId !== null || trophyOpen) return;
       if (d === "up" || d === "down") {
         setSel((s) => (s + 1) % GAMES.length);
         sfx.select();
       }
     },
-    onPrimary: () => gameId === null && play(GAMES[sel % GAMES.length].id),
-    onStart: () => gameId === null && play(GAMES[sel % GAMES.length].id),
+    onPrimary: () => gameId === null && !trophyOpen && play(GAMES[sel % GAMES.length].id),
+    onStart: () => gameId === null && !trophyOpen && play(GAMES[sel % GAMES.length].id),
   });
 
   return (

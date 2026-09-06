@@ -6,7 +6,7 @@ import { burst } from "../ui/confetti";
 import type { DirName } from "../game/engine";
 import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
 import { IconChevron, IconHome, IconMemory, IconQuestion, IconRestart, IconSound, IconTrophy } from "../ui/icons";
-import { useGamepad } from "../ui/input";
+import { isTypingTarget, useGamepad } from "../ui/input";
 import { ShareButton } from "../ui/ShareButton";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
@@ -165,6 +165,7 @@ export function MemoryGame({
       arrowright: "right", d: "right",
     };
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(e)) return;
       sfx.unlock();
       const lower = e.key.toLowerCase();
       if (dirMap[lower]) {

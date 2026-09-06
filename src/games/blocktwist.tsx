@@ -14,7 +14,7 @@ import {
   IconSound,
   IconTrophy,
 } from "../ui/icons";
-import { useGamepad } from "../ui/input";
+import { isTypingTarget, useGamepad } from "../ui/input";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import { ShareButton } from "../ui/ShareButton";
 import type { SharePayload } from "../game/share";
@@ -185,6 +185,7 @@ export function BlockGame({
       arrowright: "right", d: "right",
     };
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(e)) return;
       sfx.unlock();
       const lower = e.key.toLowerCase();
       if (dirMap[lower]) {

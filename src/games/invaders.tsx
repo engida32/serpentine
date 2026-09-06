@@ -5,7 +5,7 @@ import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
 import { ArcadeButton, HoldPad, IconBtn, Stat } from "../ui/controls";
 import { IconHome, IconInvaders, IconPause, IconPlay, IconRestart, IconSound, IconTrophy } from "../ui/icons";
-import { useRemoteHeld } from "../ui/input";
+import { isTypingTarget, useRemoteHeld } from "../ui/input";
 import { ShareButton } from "../ui/ShareButton";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
@@ -100,6 +100,7 @@ export function InvadersGame({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(e)) return;
       sfx.unlock();
       const g = eng();
       const lower = e.key.toLowerCase();

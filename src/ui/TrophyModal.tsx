@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { TROPHIES, unlockedTrophies, trophyCount } from "../game/progress";
 import { GAMES } from "../games";
 import { sfx } from "../game/audio";
@@ -12,6 +13,21 @@ export function TrophyModal({
   onClose: () => void;
   game?: string;
 }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    panelRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopImmediatePropagation();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const have = new Set(unlockedTrophies());
@@ -23,7 +39,12 @@ export function TrophyModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[420px] max-h-[90dvh] overflow-y-auto bg-pit/95 border border-line rounded-lg shadow-[0_26px_60px_rgba(0,0,0,0.6)] animate-rise"
+        ref={panelRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Trophies"
+        className="w-full max-w-[420px] max-h-[90dvh] overflow-y-auto bg-pit/95 border border-line rounded-lg shadow-[0_26px_60px_rgba(0,0,0,0.6)] animate-rise focus:outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-line/60">

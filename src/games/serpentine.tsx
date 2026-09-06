@@ -21,7 +21,7 @@ import {
   IconSound,
   IconTrophy,
 } from "../ui/icons";
-import { useGamepad } from "../ui/input";
+import { isTypingTarget, useGamepad } from "../ui/input";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import { ShareButton } from "../ui/ShareButton";
 import type { SharePayload } from "../game/share";
@@ -103,6 +103,7 @@ export function SnakeGame({
       arrowright: "right", d: "right",
     };
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(e)) return;
       const e2 = eng();
       if (!e2) return;
       sfx.unlock();
