@@ -284,15 +284,16 @@ export function BlockGame({
           {/* tiles */}
           {grid.map((t, i) =>
             !t ? null : (
-              <div
-                key={t.id}
-                className="absolute tile-anim"
-                style={{
-                  width: `${CELL}%`,
-                  height: `${CELL}%`,
-                  transform: `translate(${(i % BSIZE) * CELL}%, ${Math.floor(i / BSIZE) * CELL}%)`,
-                }}
-              >
+<div
+                  key={t.id}
+                  className="absolute tile-anim"
+                  style={{
+                    width: `${CELL}%`,
+                    height: `${CELL}%`,
+                    left: `${(i % BSIZE) * CELL}%`,
+                    top: `${Math.floor(i / BSIZE) * CELL}%`,
+                  }}
+                >
                 <div
                   className={`w-full h-full grid place-items-center rounded-md font-display ${tileFont(t.v)} ${tileVisual(t.v).cls}`}
                   style={tileVisual(t.v).grad ? { background: tileVisual(t.v).grad, boxShadow: "0 0 18px rgba(255,207,92,0.55)" } : undefined}
