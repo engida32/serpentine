@@ -4,7 +4,7 @@ An open-source, offline-first retro game store for TVs. Pick a game, plug in a
 controller (or use the remote), play. No account, no ads, no tracking — just
 arcade games designed for the couch.
 
-**Play it live:** https://serpentine-arcade.vercel.app
+**Play it live:** https://serpentine.vercel.app
 
 ## Games
 
@@ -114,7 +114,7 @@ create index if not exists scores_difficulty_week_idx
 2. Add `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` as Production env vars if
    you want the global leaderboard.
 3. Deploy. Every push to `main` rebuilds automatically; the site serves at
-   `serpentine-arcade.vercel.app` (rename freely in Project → Settings →
+   `serpentine.vercel.app` (rename freely in Project → Settings →
    Domains).
 
 ## Project structure
