@@ -54,6 +54,11 @@ export const IconExpand = () => (
     <path d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4" />
   </svg>
 );
+export const IconChat = () => (
+  <svg className={ic} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M3 3h10v7H7l-3 2.5V10H3V3z" />
+  </svg>
+);
 export const IconMinimize = () => (
   <svg className={ic} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4" />

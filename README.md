@@ -107,6 +107,30 @@ create index if not exists scores_difficulty_week_idx
    Vercel (Project → Settings → Environment Variables, scope: Production).
    Without these the game still works and keeps rankings on-device.
 
+## Visitor feedback & crash notifications
+
+Feedback, bug reports and crashes flow to your Slack group:
+
+1. Enable **Analytics** on the Vercel project (page views, web vitals, custom
+   events like `game_start` and `score_saved`).
+2. Run `supabase/setup-feedback.sql` once in the Supabase SQL editor. It creates
+   `public.feedback` (RLS: anonymous insert only).
+3. In Slack: install **Incoming WebHooks** (Settings → Manage apps), create one
+   on your `#general`/arcade channel, copy the webhook URL.
+4. Deploy the relay function and set its secret:
+   ```sh
+   supabase functions deploy notify-slack --no-verify-jwt
+   supabase secrets set SLACK_WEBHOOK_URL=<incoming-webhook-url>
+   ```
+5. Create a **Database Webhook** in Supabase (Dashboard → Database → Webhooks):
+   trigger on INSERT to `public.feedback`, POST to
+   `https://<project-ref>.functions.supabase.co/notify-slack` with header
+   `Authorization: Bearer <ANON_KEY>`.
+
+The arcade writes feedback/issues/crashes to that table; the webhook calls the
+function; the function posts a formatted message to your Slack. No cron, no
+polling. Works on the free tier.
+
 ## Deploy to Vercel
 
 1. Import the repo at [vercel.com/new](https://vercel.com/new) (framework:

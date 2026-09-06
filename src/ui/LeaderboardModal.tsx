@@ -13,6 +13,7 @@ import { sfx } from "../game/audio";
 import { IconTrophy } from "./icons";
 import { ArcadeButton } from "./controls";
 import { useBackHandler } from "./input";
+import { trackEvent } from "../platform/analytics";
 
 type LbMode = "all" | "week";
 
@@ -90,6 +91,7 @@ export function LeaderboardModal({
     submitScore(n, difficulty, myScore).then(() => {
       setSaved(true);
       setSaving(false);
+      trackEvent("score_saved", { difficulty, score: myScore });
     });
   };
 

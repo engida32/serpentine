@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { ArcadeButton } from "./controls";
 import { IconHome, IconRestart } from "./icons";
+import { reportCrash } from "../platform/telemetry";
 
 interface Props {
   /** Changing this key resets the boundary (e.g. the active game id). */
@@ -27,6 +28,7 @@ export class GameErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("[arcade] game crashed", error, info.componentStack);
+    reportCrash("game", error.message, info.componentStack ?? undefined, this.props.resetKey);
   }
 
   componentDidUpdate(prev: Props) {

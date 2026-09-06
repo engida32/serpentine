@@ -4,11 +4,13 @@ import { GAMES, type GameDef } from "./games";
 import { gamesPlayed, TROPHIES, totalPoints, trophiesForGame, trophyCount } from "./game/progress";
 import { IconBtn } from "./ui/controls";
 import { GameErrorBoundary } from "./ui/ErrorBoundary";
-import { IconChevron, IconMinimize, IconExpand, IconSound, IconTrophy, LogoMark } from "./ui/icons";
+import { IconChevron, IconMinimize, IconExpand, IconSound, IconTrophy, IconChat, LogoMark } from "./ui/icons";
 import { useFullscreen } from "./ui/fullscreen";
 import { autoTvMode, installInput, isTypingTarget, routeBack, useGamepad } from "./ui/input";
 import { installNativeBack, isNative } from "./platform/native";
+import { trackEvent } from "./platform/analytics";
 import { TrophyModal } from "./ui/TrophyModal";
+import { FeedbackModal } from "./ui/FeedbackModal";
 
 type GameId = GameDef["id"];
 
@@ -25,6 +27,7 @@ export default function Arcade() {
   const [gameId, setGameId] = useState<GameId | null>(null);
   const [sel, setSel] = useState(0);
   const [trophyOpen, setTrophyOpen] = useState(false);
+  const [fbOpen, setFbOpen] = useState(false);
   const { isFs, toggle } = useFullscreen();
   const [muted, setMutedState] = useState(() => {
     try {
@@ -90,6 +93,7 @@ export default function Arcade() {
   const play = useCallback((id: GameId) => {
     sfx.unlock();
     sfx.select();
+    trackEvent("game_start", { game: id });
     const idx = GAMES.findIndex((g) => g.id === id);
     if (idx >= 0) setSel(idx);
     if (window.history.state?.tag !== HISTORY_TAG) window.history.pushState({ tag: HISTORY_TAG, id }, "");
@@ -194,6 +198,9 @@ export default function Arcade() {
           )}
           <IconBtn title={muted ? "Unmute (M)" : "Mute (M)"} onClick={onMute} tabIndex={-1}>
             <IconSound muted={muted} />
+          </IconBtn>
+          <IconBtn title="Feedback / report an issue" onClick={() => setFbOpen(true)} tabIndex={-1}>
+            <IconChat />
           </IconBtn>
         </div>
       </header>
@@ -325,6 +332,7 @@ export default function Arcade() {
         </main>
       )}
       <TrophyModal open={trophyOpen} onClose={() => setTrophyOpen(false)} />
+      <FeedbackModal open={fbOpen} onClose={() => setFbOpen(false)} />
     </div>
   );
 }

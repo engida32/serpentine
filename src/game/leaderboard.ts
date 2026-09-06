@@ -78,6 +78,38 @@ export function cleanName(raw: string): string {
   return cleaned || "PLAYER";
 }
 
+export interface FeedbackPayload {
+  kind: "feedback" | "issue" | "crash";
+  message: string;
+  name?: string;
+  game?: string;
+}
+
+/**
+ * Persist feedback / bug / crash reports to the `feedback` table. A Supabase
+ * database webhook forwards new rows to the `notify-slack` edge function.
+ * Returns false when the global board is not configured so callers can fall
+ * back to local-only UI. Never throws.
+ */
+export async function submitFeedback(f: FeedbackPayload): Promise<boolean> {
+  const client = await getClient();
+  if (!client) return false;
+  const clean = f.name ? cleanName(f.name) : "";
+  try {
+    const { error } = await client.from("feedback").insert({
+      type: f.kind,
+      name: clean && clean !== "PLAYER" ? clean : null,
+      message: (f.message || "").slice(0, 4000),
+      game: f.game || null,
+      url: typeof location !== "undefined" ? location.href.slice(0, 500) : null,
+      meta: {},
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 export async function submitScore(name: string, difficulty: string, score: number): Promise<void> {
   const entry: LocalEntry = { name: cleanName(name), difficulty, score, ts: Date.now(), week: weekId() };
   const rows = loadLocal();
