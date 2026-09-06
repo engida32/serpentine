@@ -12,7 +12,15 @@ arcade games designed for the couch.
 | --- | --- |
 | **SERPENTINE** | Classic snake with 3 difficulties, bonus fruits and a cleared-board win. |
 | **BLOCK TWIST** | 2048 with pixel-perfect slides, merges and a 2048 win state. |
-| **NEON PONG** | First-to-7 duel against "The Ghost". The simplest game in the store. |
+| **NEON PONG** | First-to-7 duel against "The Ghost". |
+| **BREAKOUT** | Clear a 5-row wall before your three balls run out. |
+| **SPACE INVADERS** | Sweep the fleet, dodge their fire, defend the planet. |
+| **ASTEROIDS** | Turn, thrust and split rocks in an endless belt. |
+| **SWEEPER** | 9x9 minesweeper with a safe first sweep and a best clear time. |
+| **MEMORY** | Flip 4x4 cards and clear the board in the fewest moves. |
+
+Every game works with a TV remote, keyboard or a gamepad, and stays fully
+offline.
 
 ## Everything runs on free
 
