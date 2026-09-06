@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Sweeper, MINES, MSIZE, type SweepPhase, type MineCell } from "../game/minesweeper";
 import { sfx } from "../game/audio";
+import { recordPlay, unlockTrophy } from "../game/progress";
 import { burst } from "../ui/confetti";
 import type { DirName } from "../game/engine";
 import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
@@ -117,6 +118,16 @@ export function SweeperGame({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
+
+  /* trophies + session stats */
+  useEffect(() => {
+    if (phase !== "win") return;
+    recordPlay(0);
+    let fresh = unlockTrophy("sweeper.clear");
+    if (time < 30_000) fresh = unlockTrophy("sweeper.swift") || fresh;
+    if (flags === 0) fresh = unlockTrophy("sweeper.noflags") || fresh;
+    if (fresh) sfx.record();
+  }, [phase, time, flags]);
 
   const reveal = (x: number, y: number) => {
     const e = eng();

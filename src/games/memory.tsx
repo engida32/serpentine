@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Memory, MCOL, MROW, SYMBOLS, type MemPhase } from "../game/memory";
 import { sfx } from "../game/audio";
+import { recordPlay, unlockTrophy } from "../game/progress";
 import { burst } from "../ui/confetti";
 import type { DirName } from "../game/engine";
 import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
@@ -97,6 +98,16 @@ export function MemoryGame({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
+
+  /* trophies + session stats */
+  useEffect(() => {
+    if (phase !== "win") return;
+    recordPlay(0);
+    let fresh = false;
+    if (moves <= 8) fresh = unlockTrophy("memory.perfect") || fresh;
+    if (moves <= 12) fresh = unlockTrophy("memory.ninja") || fresh;
+    if (fresh) sfx.record();
+  }, [phase, moves]);
 
   const flip = (x: number, y: number) => {
     const e = eng();

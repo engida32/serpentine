@@ -8,9 +8,12 @@ import {
   submitScore,
   type BoardEntry,
 } from "../game/leaderboard";
+import { weekId } from "../game/progress";
 import { sfx } from "../game/audio";
 import { IconTrophy } from "./icons";
 import { ArcadeButton } from "./controls";
+
+type LbMode = "all" | "week";
 
 function rankBadge(i: number): string {
   if (i === 0) return "bg-gold text-ink";
@@ -41,13 +44,14 @@ export function LeaderboardModal({
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<LbMode>("all");
 
   useEffect(() => {
     if (!open) return;
     setSaved(false);
     setLoading(true);
     let live = true;
-    fetchBoard(difficulty, ascending).then((r) => {
+    fetchBoard(difficulty, ascending, mode === "week" ? weekId() : undefined).then((r) => {
       if (!live) return;
       setRows(r);
       setLoading(false);
@@ -55,7 +59,7 @@ export function LeaderboardModal({
     return () => {
       live = false;
     };
-  }, [open, difficulty, saved, ascending]);
+  }, [open, difficulty, saved, ascending, mode]);
 
   if (!open) return null;
 
@@ -113,6 +117,24 @@ export function LeaderboardModal({
         </div>
 
         <div className="p-4">
+          <div className="flex items-center gap-1 mb-3">
+            {(["all", "week"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => {
+                  sfx.click();
+                  setMode(m);
+                }}
+                className={`px-2.5 py-1 rounded-md font-display text-[8px] tracking-wider border transition-colors ${
+                  mode === m ? "bg-moss text-lime border-lime/60" : "text-fog border-line/60 hover:text-foam"
+                }`}
+              >
+                {m === "all" ? "TOP 10" : "THIS WEEK"}
+              </button>
+            ))}
+          </div>
+
           {!lbEnabled && (
             <p className="text-[10px] text-fog/85 bg-moss/50 border border-line/70 rounded-md px-3 py-2 mb-3 leading-relaxed">
               Offline rankings — scores are kept on this device. Connect Supabase (see README) to enable a global board.
@@ -122,7 +144,9 @@ export function LeaderboardModal({
           {loading ? (
             <p className="text-fog text-sm py-6 text-center animate-blink">LOADING…</p>
           ) : rows.length === 0 ? (
-            <p className="text-fog text-sm py-6 text-center">No scores yet — be the first on the board.</p>
+            <p className="text-fog text-sm py-6 text-center">
+              {mode === "week" ? "No scores this week yet — be the first." : "No scores yet — be the first on the board."}
+            </p>
           ) : (
             <ol className="flex flex-col gap-1">
               {rows.map((r, i) => {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { burst } from "../ui/confetti";
 import { Blocks, BSIZE, type BTile, type BlockPhase } from "../game/block";
 import { sfx } from "../game/audio";
+import { recordPlay, unlockTrophy } from "../game/progress";
 import type { DirName } from "../game/engine";
 import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
 import {
@@ -137,6 +138,18 @@ export function BlockGame({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /* trophies + session stats */
+  useEffect(() => {
+    let max = 0;
+    for (const t of grid) if (t && t.v > max) max = t.v;
+    let fresh = false;
+    if (max >= 2048) fresh = unlockTrophy("block.2048") || fresh;
+    if (max >= 4096) fresh = unlockTrophy("block.4096") || fresh;
+    if (moves >= 100) fresh = unlockTrophy("block.marathon") || fresh;
+    if (phase === "over") recordPlay(score);
+    if (fresh) sfx.record();
+  }, [phase, score, moves, grid]);
 
   const move = (dir: DirName) => {
     const e = eng();

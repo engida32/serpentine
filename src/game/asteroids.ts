@@ -8,6 +8,8 @@ export interface AstHud {
   score: number;
   lives: number;
   best: number;
+  /** Total rocks destroyed since start of the current run. */
+  rocks: number;
 }
 
 export interface Rock {
@@ -63,6 +65,7 @@ export class Asteroids {
 
   phase: AstPhase = "idle";
   private score = 0;
+  private kills = 0;
   private lives = 3;
   best = 0;
 
@@ -120,6 +123,7 @@ export class Asteroids {
 
   start() {
     this.score = 0;
+    this.kills = 0;
     this.lives = 3;
     this.rocks = [];
     this.bullets = [];
@@ -206,7 +210,7 @@ export class Asteroids {
   }
 
   private emit() {
-    this.onHud({ phase: this.phase, score: this.score, lives: this.lives, best: this.best });
+    this.onHud({ phase: this.phase, score: this.score, lives: this.lives, best: this.best, rocks: this.kills });
   }
 
   private update(dt: number) {
@@ -306,6 +310,7 @@ if (this.invuln <= 0) {
     const r = this.rocks[j];
     const base = r.level === 3 ? 30 : r.level === 2 ? 20 : 10;
     this.score += base;
+    this.kills += 1;
     sfx.merge();
     this.rocks.splice(j, 1);
     if (r.level > 1) {

@@ -38,11 +38,15 @@ offline.
   open it once and it works on a TV with no internet.
 - **TV & remote ready** — fullscreen display mode, keyboard, swipe and
   Gamepad API support (D-pad, sticks and face buttons).
-- **Leaderboard** — per-game rankings that work offline (localStorage) and
-  sync to a Supabase-backed global board when configured.
+- **Leaderboard** — per-game all-time **and weekly** rankings that work
+  offline (localStorage) and sync to a Supabase-backed global board when
+  configured.
+- **Trophies** — 20 hidden achievements (board clears, streaks, speed runs,
+  perfect games) tracked on-device and shown on the hub.
 - **Score sharing** — one tap copies a shareable score line.
 - **Open source** — adding a game is a one-file + one-line change
-  (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+  (see [CONTRIBUTING.md](CONTRIBUTING.md)); contributors get a
+  "made by @user" badge on their hub card.
 
 ## Development
 
@@ -59,24 +63,31 @@ npm run build      # production build into dist/
 2. Run this SQL in the SQL editor:
 
 ```sql
-create table public.scores (
+create table if not exists public.scores (
   id bigint generated always as identity primary key,
   name text not null,
   difficulty text not null,
   score integer not null,
+  week text,
   created_at timestamptz not null default now()
 );
 
+-- (no-op on fresh installs; adds the weekly filter column to existing tables)
+alter table public.scores add column if not exists week text;
+
 alter table public.scores enable row level security;
 
-create policy "public read scores"
+create policy if not exists "public read scores"
   on public.scores for select using (true);
 
-create policy "public insert scores"
+create policy if not exists "public insert scores"
   on public.scores for insert with check (true);
 
-create index scores_difficulty_score_idx
+create index if not exists scores_difficulty_score_idx
   on public.scores (difficulty, score desc);
+
+create index if not exists scores_difficulty_week_idx
+  on public.scores (difficulty, week);
 ```
 
 3. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Locally put them in a
@@ -98,6 +109,33 @@ src/
 ```
 
 Want to build your own game? See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Add a game
+
+Create a `GameDef` in `src/games/` and register it in the store:
+
+```tsx
+import type { GameDef } from "./types";
+import { IconGrid } from "../ui/icons";
+
+export const myGame: GameDef = {
+  id: "mygame",
+  name: "MY GAME",
+  tagline: "One-line pitch",
+  accent: "text-lime",
+  icon: <IconGrid />,
+  by: "your-github-handle",               // optional: shows "made by @you" on the hub card
+  readBest: () =>
+    Number(localStorage.getItem("serpentine.mygame.best") ?? 0) || 0,
+  render: (props) => <MyGame {...props} />,
+};
+```
+
+Then in `src/games/index.ts`: `import { myGame } from "./myGame"` and add it to
+the `GAMES` array. The hub, keyboard/gamepad navigation and trophy view all
+pick it up automatically — make sure your game records its score through
+`recordPlay()` and calls `unlockTrophy()` for any achievements (specs live in
+`src/game/progress.ts`).
 
 ## License
 

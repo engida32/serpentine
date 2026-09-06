@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Asteroids, type AstHud } from "../game/asteroids";
 import { sfx } from "../game/audio";
+import { recordPlay, unlockTrophy } from "../game/progress";
 import { ArcadeButton, HoldPad, IconBtn, Stat } from "../ui/controls";
 import { IconAsteroid, IconHome, IconPause, IconPlay, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { useRemoteHeld } from "../ui/input";
@@ -10,7 +11,7 @@ import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
 
 const BEST_KEY = "serpentine.asteroids.best";
-const INITIAL_HUD: AstHud = { phase: "idle", score: 0, lives: 3, best: 0 };
+const INITIAL_HUD: AstHud = { phase: "idle", score: 0, lives: 3, best: 0, rocks: 0 };
 
 function readBest(): number {
   try {
@@ -76,6 +77,15 @@ export function AsteroidsGame({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hud.score]);
+
+  useEffect(() => {
+    let fresh = false;
+    if (hud.rocks >= 25) fresh = unlockTrophy("asteroids.25") || fresh;
+    if (hud.rocks >= 75) fresh = unlockTrophy("asteroids.75") || fresh;
+    if (hud.phase === "over") recordPlay(hud.score);
+    if (fresh) sfx.record();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hud.phase, hud.rocks, hud.score]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

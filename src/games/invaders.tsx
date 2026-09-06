@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { burst } from "../ui/confetti";
 import { Invaders, type InvHud } from "../game/invaders";
 import { sfx } from "../game/audio";
+import { recordPlay, unlockTrophy } from "../game/progress";
 import { ArcadeButton, HoldPad, IconBtn, Stat } from "../ui/controls";
 import { IconHome, IconInvaders, IconPause, IconPlay, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { useRemoteHeld } from "../ui/input";
@@ -86,6 +87,15 @@ export function InvadersGame({
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hud.phase, hud.score]);
+
+  /* trophies + session stats */
+  useEffect(() => {
+    let fresh = false;
+    if (hud.phase === "win") fresh = unlockTrophy("invaders.planet") || fresh;
+    if (hud.score >= 10_000) fresh = unlockTrophy("invaders.10k") || fresh;
+    if (hud.phase === "over" || hud.phase === "win") recordPlay(hud.score);
+    if (fresh) sfx.record();
   }, [hud.phase, hud.score]);
 
   useEffect(() => {

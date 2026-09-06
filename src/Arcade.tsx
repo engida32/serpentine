@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { sfx } from "./game/audio";
 import { GAMES, type GameDef } from "./games";
+import { gamesPlayed, TROPHIES, totalPoints, trophiesForGame, trophyCount } from "./game/progress";
 import { IconBtn } from "./ui/controls";
-import { IconChevron, IconMinimize, IconExpand, IconSound, LogoMark } from "./ui/icons";
+import { IconChevron, IconMinimize, IconExpand, IconSound, IconTrophy, LogoMark } from "./ui/icons";
 import { useFullscreen } from "./ui/fullscreen";
 import { useGamepad } from "./ui/input";
+import { TrophyModal } from "./ui/TrophyModal";
 
 type GameId = GameDef["id"];
 
 export default function Arcade() {
   const [gameId, setGameId] = useState<GameId | null>(null);
   const [sel, setSel] = useState(0);
+  const [trophyOpen, setTrophyOpen] = useState(false);
   const { isFs, toggle } = useFullscreen();
   const [muted, setMutedState] = useState(() => {
     try {
@@ -137,10 +140,34 @@ export default function Arcade() {
             </h2>
           </div>
 
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => {
+                sfx.select();
+                setTrophyOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-md border border-line/60 bg-moss/40 px-2.5 py-1.5 text-gold hover:text-lime hover:border-lime/50 transition-colors cursor-pointer"
+            >
+              <IconTrophy className="w-3.5 h-3.5" />
+              <span className="font-display text-[10px] tabular-nums">{trophyCount()}/{TROPHIES.length}</span>
+              <span className="text-[8px] font-display text-fog/70">TROPHIES</span>
+            </button>
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-line/60 bg-moss/30 px-2.5 py-1.5 text-foam">
+              <span className="font-display text-[10px] tabular-nums">{gamesPlayed()}</span>
+              <span className="text-[8px] font-display text-fog/70">GAMES</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-line/60 bg-moss/30 px-2.5 py-1.5 text-foam">
+              <span className="font-display text-[10px] tabular-nums">{totalPoints()}</span>
+              <span className="text-[8px] font-display text-fog/70">PTS</span>
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full max-w-[820px]">
             {GAMES.map((g, i) => {
               const isActive = sel === i;
               const best = g.readBest?.() ?? 0;
+              const achv = trophiesForGame(g.id);
               return (
                 <button
                   key={g.id}
@@ -163,18 +190,27 @@ export default function Arcade() {
                   <span className="block">
                     <span className={`font-display text-[13px] ${g.accent}`}>{g.name}</span>
                     <span className="block text-[11px] text-fog mt-1.5">{g.tagline}</span>
+                    {g.by && <span className="block text-[9px] text-mint mt-1.5">made by @{g.by}</span>}
                     <span className="flex items-center justify-between mt-4">
-                      {g.readBest ? (
-                        <span className="inline-flex items-center gap-1.5 text-gold">
-                          <span className="text-[8px] font-display text-fog/70">BEST</span>
-                          <span className="font-display text-[11px] tabular-nums">{best}</span>
+                      <span className="inline-flex items-center gap-2">
+                        {g.readBest ? (
+                          <span className="inline-flex items-center gap-1.5 text-gold">
+                            <span className="text-[8px] font-display text-fog/70">BEST</span>
+                            <span className="font-display text-[11px] tabular-nums">{best}</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-gold">
+                            <span className="text-[8px] font-display text-fog/70">COIN-OP</span>
+                            <span className="font-display text-[9px]">FREE PLAY</span>
+                          </span>
+                        )}
+                        <span className="inline-flex items-center gap-1 text-gold/80">
+                          <span className="text-[8px] font-display text-fog/70">TOYS</span>
+                          <span className="font-display text-[10px] tabular-nums">
+                            {achv.unlocked.length}/{achv.total}
+                          </span>
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 text-gold">
-                          <span className="text-[8px] font-display text-fog/70">COIN-OP</span>
-                          <span className="font-display text-[9px]">FREE PLAY</span>
-                        </span>
-                      )}
+                      </span>
                       <span className="inline-flex items-center gap-1 font-display text-[9px] text-lime group-hover:gap-2 transition-all">
                         PLAY <IconChevron rotate={-90} />
                       </span>
@@ -191,6 +227,7 @@ export default function Arcade() {
           </p>
         </main>
       )}
+      <TrophyModal open={trophyOpen} onClose={() => setTrophyOpen(false)} />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
   type HudState,
 } from "../game/engine";
 import { sfx } from "../game/audio";
+import { recordPlay, unlockTrophy } from "../game/progress";
 import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
 import {
   IconChevron,
@@ -199,6 +200,17 @@ export function SnakeGame({
       bursts(3);
     }
   }, [hud.win, hud.phase]);
+
+  /* trophies + session stats */
+  useEffect(() => {
+    if (hud.phase !== "over") return;
+    recordPlay(hud.score);
+    let fresh = false;
+    if (hud.win) fresh = unlockTrophy("snake.board") || fresh;
+    if (hud.score >= 500) fresh = unlockTrophy("snake.500") || fresh;
+    if (hud.foods >= 15) fresh = unlockTrophy("snake.feast") || fresh;
+    if (fresh) sfx.record();
+  }, [hud.phase, hud.score, hud.win, hud.foods]);
 
   /* touch: swipe on the board */
   const onTouchStart = (e: React.TouchEvent) => {

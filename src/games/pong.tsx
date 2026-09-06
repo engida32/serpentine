@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { PongEngine, POINT_TARGET, type PongHud } from "../game/pong";
 import { sfx } from "../game/audio";
+import { recordPlay, unlockTrophy } from "../game/progress";
 import { burst } from "../ui/confetti";
 import { ArcadeButton, IconBtn, Stat } from "../ui/controls";
 import { IconChevron, IconHome, IconPause, IconPlay, IconPong, IconRestart, IconSound, IconTrophy } from "../ui/icons";
@@ -194,6 +195,16 @@ export function PongGame({
       sfx.gameover();
     }
   }, [hud.phase, hud.winner]);
+
+  /* trophies + session stats */
+  useEffect(() => {
+    if (hud.phase !== "over") return;
+    recordPlay(hud.l);
+    let fresh = false;
+    if (hud.winner === 0) fresh = unlockTrophy("pong.win") || fresh;
+    if (hud.best >= 5) fresh = unlockTrophy("pong.streak5") || fresh;
+    if (fresh) sfx.record();
+  }, [hud.phase, hud.winner, hud.best, hud.l]);
 
   const start = () => {
     sfx.unlock();

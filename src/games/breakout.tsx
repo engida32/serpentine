@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { burst } from "../ui/confetti";
 import { Breakout, type BreakHud } from "../game/breakout";
 import { sfx } from "../game/audio";
+import { recordPlay, unlockTrophy } from "../game/progress";
 import { ArcadeButton, HoldPad, IconBtn, Stat } from "../ui/controls";
 import { IconBreakout, IconHome, IconPause, IconPlay, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { useRemoteHeld } from "../ui/input";
@@ -87,6 +88,18 @@ export function BreakoutGame({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hud.phase, hud.score]);
+
+  /* trophies + session stats */
+  useEffect(() => {
+    let fresh = false;
+    if (hud.phase === "win") {
+      fresh = unlockTrophy("breakout.wall") || fresh;
+      if (hud.lives >= 3) fresh = unlockTrophy("breakout.flawless") || fresh;
+    }
+    if (hud.score >= 500) fresh = unlockTrophy("breakout.500") || fresh;
+    if (hud.phase === "over" || hud.phase === "win") recordPlay(hud.score);
+    if (fresh) sfx.record();
+  }, [hud.phase, hud.score, hud.lives]);
 
   /* shortcuts: r restart, m mute, f fullscreen, escape back, enter/space restart from over/win */
   useEffect(() => {

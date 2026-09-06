@@ -24,6 +24,8 @@ export interface GameDef {
   /** Tailwind classes used by the hub card + header badge. */
   accent: string;
   icon: ReactNode;
+  /** GitHub/username of the person who added the game ("made by @user"). */
+  by?: string;
   /** Highest score read for the hub "BEST" chip. Returns 0 when unused. */
   readBest?: () => number;
   render: (props: GameProps) => ReactNode;

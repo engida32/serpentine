@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { weekId } from "./progress";
 
 export interface BoardEntry {
   name: string;
@@ -8,7 +9,9 @@ export interface BoardEntry {
   remote?: boolean;
 }
 
-interface LocalEntry extends BoardEntry {}
+interface LocalEntry extends BoardEntry {
+  week: string;
+}
 
 const LOCAL_KEY = "serpentine.leaderboard";
 const NAME_KEY = "serpentine.player";
@@ -70,14 +73,14 @@ export function cleanName(raw: string): string {
 }
 
 export async function submitScore(name: string, difficulty: string, score: number): Promise<void> {
-  const entry: LocalEntry = { name: cleanName(name), difficulty, score, ts: Date.now() };
+  const entry: LocalEntry = { name: cleanName(name), difficulty, score, ts: Date.now(), week: weekId() };
   const rows = loadLocal();
   rows.push(entry);
   saveLocal(rows);
 
   if (!client) return;
   try {
-    await client.from("scores").insert({ name: entry.name, difficulty, score });
+    await client.from("scores").insert({ name: entry.name, difficulty, score, week: entry.week });
   } catch {
     /* offline or unreachable - local board still has the score */
   }
@@ -99,18 +102,20 @@ function dedupeMerge(entries: BoardEntry[], asc = false): BoardEntry[] {
   return out;
 }
 
-export async function fetchBoard(difficulty: string, asc = false): Promise<BoardEntry[]> {
-  const local = loadLocal().filter((e) => e.difficulty === difficulty);
+export async function fetchBoard(difficulty: string, asc = false, week?: string): Promise<BoardEntry[]> {
+  const local = loadLocal().filter((e) => e.difficulty === difficulty && (!week || e.week === week));
   if (!client) {
     return dedupeMerge(local.map((e) => ({ ...e, remote: false })), asc);
   }
   try {
-    const { data, error } = await client
+    let query = client
       .from("scores")
       .select("name, score, created_at")
       .eq("difficulty", difficulty)
       .order("score", { ascending: asc })
       .limit(BOARD_SIZE);
+    if (week) query = query.eq("week", week);
+    const { data, error } = await query;
     if (error) throw error;
     const remote = ((data ?? []) as { name: string; score: number; created_at?: string }[]).map((r) => ({
       name: r.name,
