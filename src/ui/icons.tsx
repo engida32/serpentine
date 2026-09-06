@@ -94,6 +94,15 @@ export const IconCheck = () => (
   </svg>
 );
 
+export const IconPong = () => (
+  <svg className={ic} viewBox="0 0 16 16" aria-hidden>
+    <rect x="1.5" y="4" width="2.4" height="8" rx="1.2" fill="currentColor" />
+    <rect x="12.1" y="4" width="2.4" height="8" rx="1.2" fill="currentColor" opacity="0.75" />
+    <circle cx="8" cy="8" r="1.7" fill="currentColor" />
+    <line x1="8" y1="1.5" x2="8" y2="14.5" stroke="currentColor" strokeWidth="1" opacity="0.35" strokeDasharray="2 2" />
+  </svg>
+);
+
 export const LogoMark = ({ size = 38 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden className="shrink-0">
     <defs>

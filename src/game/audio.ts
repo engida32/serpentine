@@ -107,6 +107,19 @@ class Sfx {
   combo() {
     [660, 880, 1108].forEach((f, i) => this.tone(f, 0.09, { wave: "triangle", vol: 0.5, delay: i * 0.045 }));
   }
+  paddle() {
+    this.tone(240, 0.05, { wave: "square", vol: 0.5, slide: 60 });
+  }
+  wall() {
+    this.tone(180, 0.04, { wave: "triangle", vol: 0.3 });
+  }
+  point() {
+    this.tone(392, 0.1, { wave: "square", vol: 0.55, slide: -60 });
+    this.tone(220, 0.12, { wave: "square", vol: 0.5, delay: 0.06, slide: -40 });
+  }
+  pongwin() {
+    [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.13, { wave: "square", vol: 0.55, delay: i * 0.07 }));
+  }
 }
 
 export const sfx = new Sfx();
