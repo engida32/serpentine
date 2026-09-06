@@ -77,11 +77,23 @@ alter table public.scores add column if not exists week text;
 
 alter table public.scores enable row level security;
 
-create policy if not exists "public read scores"
-  on public.scores for select using (true);
+-- Postgres has no "create policy if not exists"; guard with a check instead.
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'scores' and policyname = 'public read scores'
+  ) then
+    create policy "public read scores" on public.scores for select using (true);
+  end if;
 
-create policy if not exists "public insert scores"
-  on public.scores for insert with check (true);
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'scores' and policyname = 'public insert scores'
+  ) then
+    create policy "public insert scores" on public.scores for insert with check (true);
+  end if;
+end $$;
 
 create index if not exists scores_difficulty_score_idx
   on public.scores (difficulty, score desc);
