@@ -40,6 +40,7 @@ export class Breakout {
   best = 0;
 
   private px = 0;
+  private touchX: number | null = null;
   private ball = { x: 0, y: 0, vx: 0, vy: 0 };
   private bricks: boolean[] = new Array(BCOLS * BROW5).fill(true);
   private serveT = 0;
@@ -142,15 +143,23 @@ export class Breakout {
     return { x: x0 + c * (BH + BGAP), y: BMARGIN + r * (BH + BGAP), w: BH, h: BH };
   }
 
+  setTouchX(x: number | null) {
+    this.touchX = x;
+  }
+
   private update(dt: number) {
     const { W, H } = this;
     if (W <= 0 || H <= 0) return;
     const held = this.input.current;
     this.flash = Math.max(0, this.flash - dt / 500);
 
-    const psp = W * 0.55 * (dt / 1000);
-    const dir = (held.right ? 1 : 0) - (held.left ? 1 : 0);
-    this.px = clamp(this.px + dir * psp, 30, W - 30);
+    if (this.touchX !== null) {
+      this.px = clamp(this.touchX, 34, W - 34);
+    } else {
+      const psp = W * 0.55 * (dt / 1000);
+      const dir = (held.right ? 1 : 0) - (held.left ? 1 : 0);
+      this.px = clamp(this.px + dir * psp, 30, W - 30);
+    }
 
     if (this.phase === "serve") {
       this.serveT -= dt;

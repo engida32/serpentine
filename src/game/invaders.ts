@@ -45,6 +45,7 @@ export class Invaders {
   best = 0;
 
   private px = 0;
+  private touchX: number | null = null;
   private invaders: boolean[] = new Array(ROWS * COLS).fill(true);
   private ox = 0;
   private dir: 1 | -1 = 1;
@@ -122,6 +123,10 @@ export class Invaders {
     return this.invaders.filter(Boolean).length;
   }
 
+  setTouchX(x: number | null) {
+    this.touchX = x;
+  }
+
   private update(dt: number) {
     const { W, H } = this;
     if (W <= 0 || H <= 0) return;
@@ -131,9 +136,13 @@ export class Invaders {
     if (this.phase !== "playing") return;
 
     // player movement + fire
-    const psp = W * 0.5 * (dt / 1000);
-    const pdir = (held.right ? 1 : 0) - (held.left ? 1 : 0);
-    this.px = clamp(this.px + pdir * psp, 24, W - 24);
+    if (this.touchX !== null) {
+      this.px = clamp(this.touchX, 24, W - 24);
+    } else {
+      const psp = W * 0.5 * (dt / 1000);
+      const pdir = (held.right ? 1 : 0) - (held.left ? 1 : 0);
+      this.px = clamp(this.px + pdir * psp, 24, W - 24);
+    }
     this.fireCd -= dt;
     if (held.fire) {
       held.fire = false;

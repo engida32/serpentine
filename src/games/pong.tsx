@@ -117,7 +117,8 @@ export function PongGame({
       if (lower === "f") return toggleFullscreen();
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        if (eng()?.getPhase() === "over") eng()?.start();
+        const ph = eng()?.getPhase();
+        if (ph === "idle" || ph === "over") eng()?.start();
         return;
       }
       if (e.key === "Escape" || lower === "goback" || e.keyCode === 461 || e.keyCode === 10009) {
@@ -273,7 +274,8 @@ export function PongGame({
                 ) : (
                   <>
                     Hold <span className="keycap">↑</span><span className="keycap">↓</span>or{" "}
-                    <span className="keycap">W</span><span className="keycap">S</span> to move
+                    <span className="keycap">W</span><span className="keycap">S</span> to move ·{" "}
+                    <span className="keycap">Enter</span> to play
                   </>
                 )}
               </p>

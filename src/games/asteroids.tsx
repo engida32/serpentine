@@ -85,7 +85,7 @@ export function AsteroidsGame({
       if (lower === "f") return toggleFullscreen();
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        if (g && g.phase === "over") start();
+        if (g && (g.phase === "idle" || g.phase === "over")) start();
         return;
       }
       if (e.key === "Escape" || lower === "goback" || e.keyCode === 461 || e.keyCode === 10009) onExit();
@@ -151,7 +151,7 @@ export function AsteroidsGame({
                 {isCoarse ? (
                   <>Hold <span className="keycap">◀</span><span className="keycap">▶</span> to turn, <span className="keycap">▲</span> to thrust, tap <span className="keycap">●</span> to fire</>
                 ) : (
-                  <>Hold <span className="keycap">←</span><span className="keycap">→</span> to turn · <span className="keycap">↑</span> thrust · <span className="keycap">Space</span> fire</>
+                  <><span className="keycap">←</span><span className="keycap">→</span> turn · <span className="keycap">↑</span> thrust · <span className="keycap">Space</span> fire · <span className="keycap">Enter</span> to play</>
                 )}
               </p>
             </div>

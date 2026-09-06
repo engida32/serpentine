@@ -34,6 +34,7 @@ export function InvadersGame({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Invaders | null>(null);
+  const touchRef = useRef(false);
   const { held, setManual } = useRemoteHeld();
 
   const [hud, setHud] = useState<InvHud>(INITIAL_HUD);
@@ -95,7 +96,7 @@ export function InvadersGame({
       if (lower === "f") return toggleFullscreen();
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        if (g && (g.phase === "over" || g.phase === "win")) start();
+        if (g && (g.phase === "idle" || g.phase === "over" || g.phase === "win")) start();
         return;
       }
       if (e.key === "Escape" || lower === "goback" || e.keyCode === 461 || e.keyCode === 10009) onExit();
@@ -142,6 +143,27 @@ export function InvadersGame({
           className="relative rounded-[10px] border-2 border-line bg-pit overflow-hidden select-none
             shadow-[0_0_70px_rgba(255,98,87,0.1),0_26px_60px_rgba(0,0,0,0.55),inset_0_0_0_1px_rgba(6,17,12,0.9)]"
           style={{ width: boardSize, height: boardSize, touchAction: "none" }}
+          onPointerDown={(e) => {
+            touchRef.current = true;
+            sfx.unlock();
+            eng()?.setTouchX(e.clientX - e.currentTarget.getBoundingClientRect().left);
+          }}
+          onPointerMove={(e) => {
+            if (touchRef.current)
+              eng()?.setTouchX(e.clientX - e.currentTarget.getBoundingClientRect().left);
+          }}
+          onPointerUp={() => {
+            touchRef.current = false;
+            eng()?.setTouchX(null);
+          }}
+          onPointerLeave={() => {
+            touchRef.current = false;
+            eng()?.setTouchX(null);
+          }}
+          onPointerCancel={() => {
+            touchRef.current = false;
+            eng()?.setTouchX(null);
+          }}
         >
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
           <div className="absolute inset-0 crt-lines pointer-events-none z-10 opacity-50" />
@@ -161,7 +183,7 @@ export function InvadersGame({
                 {isCoarse ? (
                   <>Hold <span className="keycap">◀</span><span className="keycap">▶</span> to move, tap <span className="keycap">●</span> to fire</>
                 ) : (
-                  <>Hold <span className="keycap">←</span><span className="keycap">→</span> to move · <span className="keycap">Space</span> to fire</>
+                  <><span className="keycap">◀</span><span className="keycap">▶</span> or mouse to move · <span className="keycap">Space</span> fire · <span className="keycap">Enter</span> to play</>
                 )}
               </p>
             </div>
@@ -211,9 +233,9 @@ export function InvadersGame({
       ) : (
         <div className="shrink-0 pb-2 sm:pb-3 text-center">
           <p className="text-[11px] text-fog/85 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
-            Hold <span className="keycap">←</span><span className="keycap">→</span> to move ·
-            <span className="keycap">Space</span> fire · <span className="keycap">R</span> restart ·{" "}
-            <span className="keycap">F</span> fullscreen
+            Mouse or <span className="keycap">←</span><span className="keycap">→</span> to move ·
+            <span className="keycap">Space</span> fire · <span className="keycap">Enter</span> play/restart ·{" "}
+            <span className="keycap">R</span> restart · <span className="keycap">F</span> fullscreen
           </p>
           <p className="font-display text-[7px] text-fog/50 tracking-[0.3em] mt-1.5 uppercase">
             Sweep · Dodge · Defend
