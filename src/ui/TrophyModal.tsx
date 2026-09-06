@@ -3,6 +3,7 @@ import { TROPHIES, unlockedTrophies, trophyCount } from "../game/progress";
 import { GAMES } from "../games";
 import { sfx } from "../game/audio";
 import { IconCheck, IconTrophy } from "./icons";
+import { useBackHandler } from "./input";
 
 export function TrophyModal({
   open,
@@ -18,15 +19,15 @@ export function TrophyModal({
   useEffect(() => {
     if (!open) return;
     panelRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopImmediatePropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [open, onClose]);
+  }, [open]);
+
+  useBackHandler(
+    () => {
+      onClose();
+      return true;
+    },
+    open,
+  );
 
   if (!open) return null;
 

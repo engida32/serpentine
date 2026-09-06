@@ -1,4 +1,3 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { weekId } from "./progress";
 
 export interface BoardEntry {
@@ -20,16 +19,23 @@ const BOARD_SIZE = 10;
 
 const url = import.meta.env.VITE_SUPABASE_URL;
 const anon = import.meta.env.VITE_SUPABASE_ANON_KEY;
-let client: SupabaseClient | null = null;
-if (url && anon) {
-  try {
-    client = createClient(url, anon);
-  } catch {
-    client = null;
-  }
-}
 
-export const lbEnabled = client !== null;
+/** The live Supabase board is enabled only when the exercise env vars are set. */
+export const lbEnabled = Boolean(url && anon);
+
+/**
+ * Lazily acquired Supabase client. The heavy supabase-js bundle is only
+ * fetched (via dynamic import) on the first remote leaderboard interaction,
+ * so it never blocks initial paint.
+ */
+let clientPromise: Promise<import("@supabase/supabase-js").SupabaseClient | null> | null = null;
+function getClient(): Promise<import("@supabase/supabase-js").SupabaseClient | null> {
+  if (!lbEnabled) return Promise.resolve(null);
+  clientPromise ??= import("@supabase/supabase-js")
+    .then((m) => m.createClient(url as string, anon as string))
+    .catch(() => null);
+  return clientPromise;
+}
 
 function loadLocal(): LocalEntry[] {
   try {
@@ -78,6 +84,7 @@ export async function submitScore(name: string, difficulty: string, score: numbe
   rows.push(entry);
   saveLocal(rows);
 
+  const client = await getClient();
   if (!client) return;
   try {
     await client.from("scores").insert({ name: entry.name, difficulty, score, week: entry.week });
@@ -104,6 +111,7 @@ function dedupeMerge(entries: BoardEntry[], asc = false): BoardEntry[] {
 
 export async function fetchBoard(difficulty: string, asc = false, week?: string): Promise<BoardEntry[]> {
   const local = loadLocal().filter((e) => e.difficulty === difficulty && (!week || e.week === week));
+  const client = await getClient();
   if (!client) {
     return dedupeMerge(local.map((e) => ({ ...e, remote: false })), asc);
   }

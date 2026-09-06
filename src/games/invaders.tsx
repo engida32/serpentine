@@ -5,7 +5,7 @@ import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
 import { ArcadeButton, HoldPad, IconBtn, Stat } from "../ui/controls";
 import { IconHome, IconInvaders, IconPause, IconPlay, IconRestart, IconSound, IconTrophy } from "../ui/icons";
-import { isTypingTarget, useRemoteHeld } from "../ui/input";
+import { isTypingTarget, useGamepad, useRemoteHeld, useShellBack } from "../ui/input";
 import { ShareButton } from "../ui/ShareButton";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
@@ -48,6 +48,20 @@ export function InvadersGame({
 
   const eng = () => engineRef.current;
 
+  useShellBack({
+    phase: hud.phase,
+    pausePhases: ["playing"],
+    enterPause: () => eng()?.togglePause(),
+    lbOpen,
+    closeLb: () => setLbOpen(false),
+    onExit,
+  });
+
+  useGamepad({
+    onSecondary: () => eng()?.togglePause(),
+    onStart: () => eng()?.togglePause(),
+  });
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -86,7 +100,6 @@ export function InvadersGame({
         zIndex: 200,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hud.phase, hud.score]);
 
   /* trophies + session stats */

@@ -15,19 +15,30 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["fonts/*.woff2", "icons/*.svg", "icons/*.png"],
       manifest: {
+        id: "/",
         name: "Serpentine Arcade",
         short_name: "Serpentine",
         description: "Eight playable arcade classics in one browser — Snake, Block Twist, Breakout, Invaders, Pong, Asteroids, Minesweeper and Memory.",
         lang: "en",
         display: "fullscreen",
+        orientation: "landscape",
         start_url: ".",
         scope: ".",
         theme_color: "#06110c",
         background_color: "#06110c",
+        screenshots: [
+          {
+            src: "screenshots/home-1280x800.png",
+            sizes: "1280x800",
+            type: "image/png",
+            form_factor: "wide",
+            label: "Serpentine Arcade hub",
+          },
+        ],
         icons: [
           { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
           { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-          { src: "icons/icon-512.svg", sizes: "512x512", type: "image/svg+xml", purpose: "maskable" },
+          { src: "icons/icon-512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
       workbox: {

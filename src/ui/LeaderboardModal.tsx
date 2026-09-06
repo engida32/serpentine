@@ -12,6 +12,7 @@ import { weekId } from "../game/progress";
 import { sfx } from "../game/audio";
 import { IconTrophy } from "./icons";
 import { ArcadeButton } from "./controls";
+import { useBackHandler } from "./input";
 
 type LbMode = "all" | "week";
 
@@ -65,15 +66,15 @@ export function LeaderboardModal({
   useEffect(() => {
     if (!open) return;
     panelRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopImmediatePropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [open, onClose]);
+  }, [open]);
+
+  useBackHandler(
+    () => {
+      onClose();
+      return true;
+    },
+    open,
+  );
 
   if (!open) return null;
 

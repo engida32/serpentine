@@ -4,7 +4,7 @@ import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
 import { burst } from "../ui/confetti";
 import { ArcadeButton, IconBtn, Stat } from "../ui/controls";
-import { isTypingTarget } from "../ui/input";
+import { isTypingTarget, useGamepad, useShellBack } from "../ui/input";
 import { IconChevron, IconHome, IconPause, IconPlay, IconPong, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { ShareButton } from "../ui/ShareButton";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
@@ -91,6 +91,20 @@ export function PongGame({
 
   const eng = () => engineRef.current;
 
+  useShellBack({
+    phase: hud.phase,
+    pausePhases: ["serve", "playing"],
+    enterPause: () => eng()?.togglePause(),
+    lbOpen,
+    closeLb: () => setLbOpen(false),
+    onExit,
+  });
+
+  useGamepad({
+    onSecondary: () => eng()?.togglePause(),
+    onStart: () => eng()?.togglePause(),
+  });
+
   const pushInput = () => {
     const e = eng();
     if (!e) return;
@@ -168,7 +182,7 @@ export function PongGame({
       try {
         gp = navigator.getGamepads?.()[0] ?? null;
       } catch {
-        gp = null;
+        /* ignore */
       }
       if (!gp) return;
       const up = (gp.buttons[12]?.pressed && gp.buttons[12].value > 0) || (gp.axes[1] ?? 0) < -0.5;

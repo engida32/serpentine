@@ -7,3 +7,5 @@ build/
 .env.local
 .env.*.local
 .vercel/
+
+android/app/src/main/assets/public/

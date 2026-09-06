@@ -6,7 +6,7 @@ import { burst } from "../ui/confetti";
 import type { DirName } from "../game/engine";
 import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
 import { IconChevron, IconHome, IconMemory, IconQuestion, IconRestart, IconSound, IconTrophy } from "../ui/icons";
-import { isTypingTarget, useGamepad } from "../ui/input";
+import { isTypingTarget, useGamepad, useShellBack } from "../ui/input";
 import { ShareButton } from "../ui/ShareButton";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
@@ -49,6 +49,14 @@ export function MemoryGame({
   );
 
   const eng = () => engineRef.current;
+
+  useShellBack({
+    phase,
+    pausePhases: [],
+    lbOpen,
+    closeLb: () => setLbOpen(false),
+    onExit,
+  });
 
   const sync = () => {
     const e = eng();

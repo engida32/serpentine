@@ -100,6 +100,33 @@ export function useBackHandler(handler: BackHandler, active = true) {
   }, [active]);
 }
 
+/**
+ * The standard per-game Back behaviour: close an open leaderboard, pause an
+ * in-flight run, otherwise return to the hub. Pause-aware shells pass the
+ * phases their engine can pause from; turn-based games pass an empty list.
+ */
+export function useShellBack(o: {
+  lbOpen: boolean;
+  closeLb: () => void;
+  onExit: () => void;
+  enterPause?: () => void;
+  pausePhases: readonly string[];
+  phase: string;
+}) {
+  useBackHandler(() => {
+    if (o.lbOpen) {
+      o.closeLb();
+      return true;
+    }
+    if (o.pausePhases.includes(o.phase)) {
+      o.enterPause?.();
+      return true;
+    }
+    o.onExit();
+    return true;
+  });
+}
+
 /* ------------------------------------------------------------------ */
 /* Input bus                                                           */
 /* ------------------------------------------------------------------ */
@@ -328,8 +355,7 @@ export function useGamepad(c: GlobalControls) {
 /* Held-state input for motion games                                   */
 /* ------------------------------------------------------------------ */
 
-const HOLD_DIRS = ["up", "down", "left", "right"] as const;
-type HoldDir = (typeof HOLD_DIRS)[number];
+type HoldDir = "up" | "down" | "left" | "right";
 
 /**
  * Continuous held-state input for motion games (Breakout, Invaders,

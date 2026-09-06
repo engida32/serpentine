@@ -21,7 +21,7 @@ import {
   IconSound,
   IconTrophy,
 } from "../ui/icons";
-import { isTypingTarget, useGamepad } from "../ui/input";
+import { isTypingTarget, useGamepad, useShellBack } from "../ui/input";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import { ShareButton } from "../ui/ShareButton";
 import type { SharePayload } from "../game/share";
@@ -72,6 +72,15 @@ export function SnakeGame({
   );
 
   const eng = () => engineRef.current;
+
+  useShellBack({
+    phase: hud.phase,
+    pausePhases: ["playing"],
+    enterPause: () => eng()?.togglePause(),
+    lbOpen,
+    closeLb: () => setLbOpen(false),
+    onExit,
+  });
 
   /* engine + sizing */
   useEffect(() => {
