@@ -32,7 +32,6 @@ export function SweeperGame({
   muted,
   onMute,
   onExit,
-  toggleFullscreen,
 }: {
   muted: boolean;
   onMute: () => void;

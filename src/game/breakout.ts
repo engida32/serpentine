@@ -262,7 +262,7 @@ export class Breakout {
     }
   }
 
-  private render(t: number) {
+  private render(_t: number) {
     const { ctx, W, H } = this;
     if (W <= 0 || H <= 0) return;
     ctx.clearRect(0, 0, W, H);

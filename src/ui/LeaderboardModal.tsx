@@ -92,8 +92,6 @@ export function LeaderboardModal({
     });
   };
 
-  const myKey = `${name}:${myScore}`;
-
   return (
     <div
       className="fixed inset-0 z-40 grid place-items-center p-3 sm:p-6 bg-[rgba(3,10,6,0.86)] animate-rise"

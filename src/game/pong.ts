@@ -156,7 +156,6 @@ export class PongEngine {
   }
 
   private launch() {
-    const W = this.cssW;
     const H = this.cssH;
     const speed = H * 0.62;
     const dir = this.bvx < 0 ? 1 : -1;
@@ -231,7 +230,6 @@ export class PongEngine {
     if (this.phase !== "playing") return;
 
     // ball
-    const sp = H * 0.62;
     this.bx += this.bvx * (dt / 1000);
     this.by += this.bvy * (dt / 1000);
 
@@ -290,7 +288,7 @@ export class PongEngine {
     sfx.paddle();
   }
 
-  private render(t: number) {
+  private render(_t: number) {
     const { ctx, cssW: W, cssH: H } = this;
     if (W <= 0 || H <= 0) return;
     ctx.clearRect(0, 0, W, H);

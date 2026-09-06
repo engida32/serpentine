@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Memory, MCOL, MROW, SYMBOLS, type MemPhase } from "../game/memory";
+import { Memory, MCOL, SYMBOLS, type MemPhase } from "../game/memory";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
 import { burst } from "../ui/confetti";
