@@ -54,19 +54,15 @@ export default function Arcade() {
         sfx.select();
         return;
       }
-      if (e.key === "Enter" || e.key === " " || lower === "1") {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         play(GAMES[sel % GAMES.length].id);
         return;
       }
-      if (lower === "2" && GAMES[1]) {
+      const n = parseInt(lower, 10);
+      if (n >= 1 && n <= GAMES.length) {
         e.preventDefault();
-        play(GAMES[1].id);
-        return;
-      }
-      if (lower === "3" && GAMES[2]) {
-        e.preventDefault();
-        play(GAMES[2].id);
+        play(GAMES[n - 1].id);
       }
     };
     window.addEventListener("keydown", onKey);

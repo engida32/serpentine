@@ -1,4 +1,5 @@
 import { sfx } from "./audio";
+import { prefersReducedMotion } from "./motion";
 
 export const COLS = 21;
 export const ROWS = 21;
@@ -134,7 +135,7 @@ export class SnakeEngine {
     this.ctx = ctx;
     this.best = loadBest(this.difficulty);
     this.resetBoard();
-    this.seedMotes();
+    if (!prefersReducedMotion()) this.seedMotes();
     this.last = performance.now();
     const loop = (t: number) => {
       if (this.destroyed) return;
@@ -732,7 +733,7 @@ export class SnakeEngine {
       }
       // tongue flick
       const flick = (now / 1000) % 2.3;
-      if (flick < 0.28 && this.phase === "playing") {
+      if (flick < 0.28 && this.phase === "playing" && !prefersReducedMotion()) {
         const len = cell * (0.45 + 0.2 * Math.sin((flick / 0.28) * Math.PI));
         ctx.strokeStyle = "#ff6257";
         ctx.lineWidth = Math.max(1.5, cell * 0.07);

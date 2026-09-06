@@ -9,7 +9,17 @@ import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
 
-const INITIAL_HUD: PongHud = { phase: "idle", l: 0, r: 0, winner: null };
+const INITIAL_HUD: PongHud = { phase: "idle", l: 0, r: 0, winner: null, best: 0 };
+
+const BEST_KEY = "serpentine.best.pong";
+
+function readBest(): number {
+  try {
+    return Number(localStorage.getItem(BEST_KEY) ?? 0) || 0;
+  } catch {
+    return 0;
+  }
+}
 
 const UP_KEYS = new Set(["arrowup", "w", "W"]);
 const DOWN_KEYS = new Set(["arrowdown", "s", "S"]);
@@ -217,6 +227,7 @@ export function PongGame({
         <Stat label="GHOST" accent="text-coral">
           <span key={hud.r} className="inline-block animate-pop">{hud.r}</span>
         </Stat>
+        <Stat label="STREAK" accent="text-gold">{hud.best > 0 ? hud.best : "—"}</Stat>
         <div className="flex items-center gap-2 bg-pit/90 border border-line rounded-md px-3 py-2">
           <span className="font-display text-[8px] text-fog tracking-wider">TARGET</span>
           <span className="font-display text-sm text-gold tabular-nums">{POINT_TARGET}</span>
@@ -399,5 +410,6 @@ export const pong: GameDef = {
   tagline: "Face The Ghost. First to 7",
   accent: "text-coral",
   icon: <IconPong />,
+  readBest: readBest,
   render: ({ onFullscreen, ...rest }) => <PongGame toggleFullscreen={onFullscreen} {...rest} />,
 };

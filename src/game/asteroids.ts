@@ -1,4 +1,5 @@
 import { sfx } from "./audio";
+import { prefersReducedMotion } from "./motion";
 import type { Held } from "../ui/input";
 
 export type AstPhase = "idle" | "playing" | "paused" | "over";
@@ -86,8 +87,10 @@ export class Asteroids {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("no 2d context");
     this.ctx = ctx;
-    for (let i = 0; i < STAR; i++) {
-      this.stars.push({ x: Math.random(), y: Math.random(), s: Math.random() * 1.4 + 0.3 });
+    if (!prefersReducedMotion()) {
+      for (let i = 0; i < STAR; i++) {
+        this.stars.push({ x: Math.random(), y: Math.random(), s: Math.random() * 1.4 + 0.3 });
+      }
     }
     this.last = performance.now();
     const loop = (t: number) => {

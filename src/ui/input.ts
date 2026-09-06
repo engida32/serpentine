@@ -147,15 +147,22 @@ export function useRemoteHeld(): {
       const dir = dirOf(e.key);
       if (dir) manual.current[dir] = false;
     };
-    const onVis = () => {
-      if (document.hidden) manual.current = { up: false, down: false, left: false, right: false };
+    const resetInFlight = () => {
+      manual.current = { up: false, down: false, left: false, right: false };
+      held.current.fire = false;
     };
+    const onVis = () => {
+      if (document.hidden) resetInFlight();
+    };
+    const onBlur = () => resetInFlight();
     window.addEventListener("keydown", onKey);
     window.addEventListener("keyup", onUp);
+    window.addEventListener("blur", onBlur);
     document.addEventListener("visibilitychange", onVis);
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("keyup", onUp);
+      window.removeEventListener("blur", onBlur);
       document.removeEventListener("visibilitychange", onVis);
     };
   }, []);

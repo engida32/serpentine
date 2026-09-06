@@ -6,6 +6,8 @@ export interface PongHud {
   l: number;
   r: number;
   winner: 0 | 1 | null;
+  /** Longest run of games won against the Ghost. */
+  best: number;
 }
 
 export const POINT_TARGET = 7;
@@ -14,6 +16,22 @@ const PW = 15;
 const PH = 96;
 const MM = 28;
 const BR = 10;
+const BEST_KEY = "serpentine.best.pong";
+
+function loadBest(): number {
+  try {
+    return Number(localStorage.getItem(BEST_KEY) ?? 0) || 0;
+  } catch {
+    return 0;
+  }
+}
+function saveBest(v: number) {
+  try {
+    localStorage.setItem(BEST_KEY, String(v));
+  } catch {
+    /* ignore */
+  }
+}
 
 function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v));
@@ -33,6 +51,8 @@ export class PongEngine {
   private l = 0;
   private r = 0;
   private winner: 0 | 1 | null = null;
+  private wins = 0;
+  private best = 0;
 
   private p1y = 0;
   private p2y = 0;
@@ -57,6 +77,7 @@ export class PongEngine {
     if (!ctx) throw new Error("no 2d context");
     this.ctx = ctx;
     this.last = performance.now();
+    this.best = loadBest();
     const loop = (t: number) => {
       if (this.destroyed) return;
       const dt = Math.min(50, t - this.last);
@@ -99,6 +120,7 @@ export class PongEngine {
     this.l = 0;
     this.r = 0;
     this.winner = null;
+    this.wins = 0;
     this.resumeTo = null;
     this.beginServe();
   }
@@ -149,13 +171,22 @@ export class PongEngine {
     this.winner = winner;
     this.phase = "over";
     this.flash = 1;
-    if (winner === 0) sfx.pongwin();
-    else sfx.gameover();
+    if (winner === 0) {
+      this.wins += 1;
+      if (this.wins > this.best) {
+        this.best = this.wins;
+        saveBest(this.best);
+      }
+      sfx.pongwin();
+    } else {
+      this.wins = 0;
+      sfx.gameover();
+    }
     this.emit();
   }
 
   private emit() {
-    this.onHud({ phase: this.phase, l: this.l, r: this.r, winner: this.winner });
+    this.onHud({ phase: this.phase, l: this.l, r: this.r, winner: this.winner, best: this.best });
   }
 
   private update(dt: number) {
