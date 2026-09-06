@@ -103,6 +103,50 @@ export const IconPong = () => (
   </svg>
 );
 
+export const IconBreakout = () => (
+  <svg className={ic} viewBox="0 0 16 16" aria-hidden>
+    <rect x="2" y="1.5" width="3" height="1.6" rx="0.4" fill="currentColor" opacity="0.9" />
+    <rect x="7" y="1.5" width="3" height="1.6" rx="0.4" fill="currentColor" opacity="0.6" />
+    <rect x="12" y="1.5" width="3" height="1.6" rx="0.4" fill="currentColor" opacity="0.35" />
+    <rect x="4.5" y="4" width="4" height="1.6" rx="0.4" fill="currentColor" opacity="0.75" />
+    <rect x="10.5" y="4" width="3" height="1.6" rx="0.4" fill="currentColor" opacity="0.5" />
+    <circle cx="8" cy="9" r="1.4" fill="currentColor" />
+    <rect x="2.5" y="13" width="11" height="1.8" rx="0.9" fill="currentColor" />
+  </svg>
+);
+
+export const IconInvaders = () => (
+  <svg className={ic} viewBox="0 0 16 16" aria-hidden>
+    <path d="M3 3h10v2h-2v1h-3v1H8V6H5V5H3zM2 6h3v4H2zM11 6h3v4h-3zM5 8h6" fill="currentColor" opacity="0.85" />
+    <rect x="7.2" y="13.6" width="1.6" height="1.6" fill="currentColor" opacity="0.9" />
+    <line x1="4.5" y1="12.5" x2="4.5" y2="13.5" stroke="currentColor" strokeWidth="0.8" opacity="0.5" />
+  </svg>
+);
+
+export const IconAsteroid = () => (
+  <svg className={ic} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+    <path d="M8 1.5l1.6 1.5 2.4-.4 1 2.2 2.2 1-.8 2.2.8 2.2-2.2 1-1 2.2-2.4-.4-1.6 1.5-1.6-1.5-2.4.4-1-2.2L2 9.2l.8-2.2L2 4.8l2.2-1 1-2.2 2.4.4z" opacity="0.8" />
+    <circle cx="6" cy="6" r="1" fill="#0a1e15" opacity="0.6" />
+    <circle cx="10.5" cy="10" r="0.8" fill="#0a1e15" opacity="0.6" />
+  </svg>
+);
+
+export const IconMine = () => (
+  <svg className={ic} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+    <circle cx="8" cy="8" r="4" opacity="0.8" />
+    <circle cx="8" cy="8" r="1.4" fill="#0a1e15" opacity="0.7" />
+    <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4" stroke="currentColor" strokeWidth="1" opacity="0.7" />
+  </svg>
+);
+
+export const IconMemory = () => (
+  <svg className={ic} viewBox="0 0 16 16" aria-hidden>
+    <rect x="1.5" y="2" width="5.5" height="8" rx="1" fill="currentColor" opacity="0.55" />
+    <rect x="9" y="2" width="5.5" height="8" rx="1" fill="currentColor" opacity="0.85" />
+    <path d="M3.5 13.5h2.5M10 13.5h2.5" stroke="currentColor" strokeWidth="0.8" opacity="0.5" />
+  </svg>
+);
+
 export const LogoMark = ({ size = 38 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden className="shrink-0">
     <defs>

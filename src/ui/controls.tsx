@@ -1,4 +1,5 @@
 import { sfx } from "../game/audio";
+import { IconChevron } from "./icons";
 
 export function ArcadeButton({
   children,
@@ -123,6 +124,42 @@ export function DPad({
       `}
     >
       {children}
+    </button>
+  );
+}
+
+/** Coarse-pointer hold button for motion games (fires on press, releases on up/leave). */
+export function HoldPad({
+  dir,
+  onHold,
+  label,
+  ghost = false,
+}: {
+  dir: "up" | "down" | "left" | "right";
+  onHold: (v: boolean) => void;
+  label: string;
+  ghost?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onPointerDown={(e) => {
+        e.preventDefault();
+        sfx.unlock();
+        onHold(true);
+      }}
+      onPointerUp={() => onHold(false)}
+      onPointerLeave={() => onHold(false)}
+      onPointerCancel={() => onHold(false)}
+      className={`
+        grid place-items-center rounded-lg border border-line border-b-4 border-b-[#04100a]
+        transition-all duration-75 touch-none cursor-pointer select-none
+        active:translate-y-[2px] active:border-b-2
+        ${ghost ? "bg-gradient-to-b from-moss to-pit text-lime" : "bg-gradient-to-b from-fern to-moss text-mint"}
+      `}
+    >
+      <IconChevron rotate={dir === "up" ? 0 : dir === "down" ? 180 : dir === "right" ? 90 : -90} />
     </button>
   );
 }

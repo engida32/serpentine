@@ -83,3 +83,115 @@ export function autoTvMode(): boolean {
   const ratio = window.innerWidth / Math.max(1, window.innerHeight);
   return coarse && ratio >= 1.45 && window.innerWidth >= 900;
 }
+
+export interface Held {
+  up: boolean;
+  down: boolean;
+  left: boolean;
+  right: boolean;
+  /** Latched rising edge — the game loop consumes it by clearing it. */
+  fire: boolean;
+}
+
+const UP_KEYS = new Set(["arrowup", "w", "W"]);
+const DOWN_KEYS = new Set(["arrowdown", "s", "S"]);
+const LEFT_KEYS = new Set(["arrowleft", "a", "A"]);
+const RIGHT_KEYS = new Set(["arrowright", "d", "D"]);
+const FIRE_KEYS = new Set([" ", "enter"]);
+const HOLD_DIRS = ["up", "down", "left", "right"] as const;
+type HoldDir = (typeof HOLD_DIRS)[number];
+
+/**
+ * Continuous held-state input for motion games (Breakout, Invaders,
+ * Asteroids): keyboard held keys, D-pad hold buttons and the Gamepad
+ * API are merged every ~50ms into a shared snapshot. `fire` is latched
+ * on the rising edge of a tap and must be consumed by the game loop.
+ */
+export function useRemoteHeld(): {
+  held: React.MutableRefObject<Held>;
+  setManual: (k: HoldDir | "fire", v: boolean) => void;
+} {
+  const held = useRef<Held>({ up: false, down: false, left: false, right: false, fire: false });
+  const manual = useRef<Record<string, boolean>>({ up: false, down: false, left: false, right: false });
+
+  const setManual = (k: HoldDir | "fire", v: boolean) => {
+    if (k === "fire") {
+      if (v) held.current.fire = true;
+      return;
+    }
+    manual.current[k] = v;
+  };
+
+  useEffect(() => {
+    const dirOf = (key: string): HoldDir | null => {
+      if (UP_KEYS.has(key)) return "up";
+      if (DOWN_KEYS.has(key)) return "down";
+      if (LEFT_KEYS.has(key)) return "left";
+      if (RIGHT_KEYS.has(key)) return "right";
+      return null;
+    };
+    const onKey = (e: KeyboardEvent) => {
+      sfx.unlock();
+      const dir = dirOf(e.key);
+      if (dir) {
+        manual.current[dir] = true;
+        e.preventDefault();
+        return;
+      }
+      if (FIRE_KEYS.has(e.key)) {
+        held.current.fire = true;
+        e.preventDefault();
+      }
+    };
+    const onUp = (e: KeyboardEvent) => {
+      const dir = dirOf(e.key);
+      if (dir) manual.current[dir] = false;
+    };
+    const onVis = () => {
+      if (document.hidden) manual.current = { up: false, down: false, left: false, right: false };
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("keyup", onUp);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keyup", onUp);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      let gp: Gamepad | null = null;
+      try {
+        gp = navigator.getGamepads?.()[0] ?? null;
+      } catch {
+        gp = null;
+      }
+      if (gp) {
+        const b = gp.buttons;
+        const ax = gp.axes[0] ?? 0;
+        const ay = gp.axes[1] ?? 0;
+        const h = held.current;
+        const up = (b[12]?.pressed && b[12].value > 0) || ay < -0.5;
+        const down = (b[13]?.pressed && b[13].value > 0) || ay > 0.5;
+        const left = (b[14]?.pressed && b[14].value > 0) || ax < -0.5;
+        const right = (b[15]?.pressed && b[15].value > 0) || ax > 0.5;
+        h.up = up || manual.current.up;
+        h.down = down || manual.current.down;
+        h.left = left || manual.current.left;
+        h.right = right || manual.current.right;
+        if (b[0]?.pressed) h.fire = true;
+      } else {
+        const h = held.current;
+        h.up = manual.current.up;
+        h.down = manual.current.down;
+        h.left = manual.current.left;
+        h.right = manual.current.right;
+      }
+    }, 50);
+    return () => window.clearInterval(id);
+  }, []);
+
+  return { held, setManual };
+}

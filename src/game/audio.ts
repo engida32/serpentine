@@ -120,6 +120,16 @@ class Sfx {
   pongwin() {
     [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.13, { wave: "square", vol: 0.55, delay: i * 0.07 }));
   }
+  shoot() {
+    this.tone(920, 0.07, { wave: "sawtooth", vol: 0.4, slide: 180 });
+  }
+  boom() {
+    this.tone(130, 0.35, { wave: "sawtooth", vol: 0.7, slide: -80 });
+    this.tone(70, 0.4, { wave: "square", vol: 0.5, delay: 0.05, slide: -20 });
+  }
+  flag() {
+    this.tone(300, 0.05, { wave: "triangle", vol: 0.5, slide: 120 });
+  }
 }
 
 export const sfx = new Sfx();
