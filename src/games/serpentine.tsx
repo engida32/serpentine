@@ -9,7 +9,7 @@ import {
 } from "../game/engine";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
-import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
+import { ArcadeButton, DPad, IconBtn, MuteBtn, Stat } from "../ui/controls";
 import {
   IconChevron,
   IconCrown,
@@ -22,6 +22,7 @@ import {
   IconTrophy,
 } from "../ui/icons";
 import { isTypingTarget, useGamepad, useShellBack } from "../ui/input";
+import { useControlMode } from "../ui/useDisplayMode";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import { ShareButton } from "../ui/ShareButton";
 import type { SharePayload } from "../game/share";
@@ -67,9 +68,7 @@ export function SnakeGame({
   const [boardSize, setBoardSize] = useState(320);
   const [lbOpen, setLbOpen] = useState(false);
   const [lbScore, setLbScore] = useState(0);
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const { isTouch } = useControlMode();
 
   const eng = () => engineRef.current;
 
@@ -91,9 +90,9 @@ export function SnakeGame({
     engineRef.current = eng2;
     const ro = new ResizeObserver(() => {
       const r = container.getBoundingClientRect();
-      const s = Math.max(240, Math.floor(Math.min(r.width, r.height)));
+      const s = Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height))));
       setBoardSize(s);
-      eng2.resize(s, s, window.devicePixelRatio || 1);
+      eng2.resize(s, s, Math.min(window.devicePixelRatio || 1, 2));
     });
     ro.observe(container);
     return () => {
@@ -341,6 +340,7 @@ export function SnakeGame({
                 <ArcadeButton onClick={() => eng()?.toMenu()}>
                   <IconHome /> Quit
                 </ArcadeButton>
+                <MuteBtn muted={muted} onToggle={onMute} />
               </div>
               <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
                 <span className="keycap">P</span> to resume
@@ -415,7 +415,7 @@ export function SnakeGame({
                 <ShareButton payload={{ game: "SERPENTINE", mode: DIFFICULTIES[1].label, score: hud.best }} />
               </div>
               <p className="text-[11px] tv:text-lg text-fog/85 text-center leading-relaxed">
-                {isCoarse ? (
+                {isTouch ? (
                   <>Swipe the board or use the pad to steer · gamepad ready</>
                 ) : (
                   <span className="flex items-center justify-center gap-1.5 flex-wrap">
@@ -477,8 +477,9 @@ export function SnakeGame({
                   <IconTrophy /> Save Score
                 </ArcadeButton>
               </div>
+              <MuteBtn muted={muted} onToggle={onMute} />
               <ShareButton payload={sharePayload} />
-              {!isCoarse && (
+              {!isTouch && (
                 <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
                   <span className="keycap">SPACE</span> retry · <span className="keycap">ESC</span> menu
                 </p>
@@ -489,7 +490,7 @@ export function SnakeGame({
       </div>
 
       {/* controls row */}
-      {isCoarse ? (
+      {isTouch ? (
         <div className="shrink-0 pb-2 flex items-center justify-center gap-8">
           <div className="grid grid-cols-3 gap-1.5">
             <span />

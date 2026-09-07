@@ -17,7 +17,7 @@ import { activateFocused, activeMenu, installMenuAutofocus, isTextField, moveFoc
 export function isBackKey(e: KeyboardEvent): boolean {
   const k = e.key;
   if (k === "Escape" || k === "GoBack" || k === "BrowserBack") return true;
-  if (e.keyCode === 461 || e.keyCode === 10009) return true;
+  if (e.keyCode === 461 || e.keyCode === 10009 || e.keyCode === 4) return true; // 4 = Android KEYCODE_BACK
   if (k === "Backspace" && !isTextField(e.target as Element | null)) return true;
   return false;
 }
@@ -25,7 +25,7 @@ export function isBackKey(e: KeyboardEvent): boolean {
 /** Media / remote keys that should behave like the gamepad Start button. */
 export function isStartKey(e: KeyboardEvent): boolean {
   const k = e.key;
-  return k === "MediaPlayPause" || k === "MediaPlay" || k === "MediaPause" || k === "ContextMenu" || e.keyCode === 179 || e.keyCode === 10252;
+  return k === "MediaPlayPause" || k === "MediaPlay" || k === "MediaPause" || k === "ContextMenu" || e.keyCode === 179 || e.keyCode === 10252 || e.keyCode === 85;
 }
 
 const KEY_DIRS: Record<string, DirName> = {
@@ -35,12 +35,16 @@ const KEY_DIRS: Record<string, DirName> = {
   arrowright: "right", d: "right",
 };
 
+const KEYCODE_DIRS: Record<number, DirName> = {
+  19: "up", 20: "down", 21: "left", 22: "right", // Android KEYCODE_DPAD_*
+};
+
 export function keyDir(e: KeyboardEvent): DirName | null {
-  return KEY_DIRS[e.key.toLowerCase()] ?? null;
+  return KEY_DIRS[e.key.toLowerCase()] ?? KEYCODE_DIRS[e.keyCode] ?? null;
 }
 
 export function isConfirmKey(e: KeyboardEvent): boolean {
-  return e.key === "Enter" || e.key === " " || e.key === "Select" || e.keyCode === 13;
+  return e.key === "Enter" || e.key === " " || e.key === "Select" || e.keyCode === 13 || e.keyCode === 23; // 23 = Android KEYCODE_DPAD_CENTER
 }
 
 /** True when the event originated from an editable field (e.g. the leaderboard name input). */

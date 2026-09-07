@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* 10-foot UI: `.tv` is set on <html> for TV user agents / native shell. */
-@custom-variant tv (&:where(.tv, .tv *));
+/* 10-foot UI: `.tv` is set on <html> and `data-tv="true"` on the app root for TV UAs. */
+@custom-variant tv (&:where(.tv, .tv *, [data-tv="true"], [data-tv="true"] *));
 
 @font-face {
   font-family: "Press Start 2P";
@@ -172,8 +172,16 @@ html.tv [data-pointer-only] {
 
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--color-lime);
+  outline: 3px solid var(--color-lime);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(163, 245, 90, 0.35);
+}
+html.tv button:focus-visible,
+html.tv a:focus-visible,
+[data-tv="true"] button:focus-visible,
+[data-tv="true"] a:focus-visible {
+  outline-width: 4px;
+  box-shadow: 0 0 0 6px rgba(163, 245, 90, 0.45);
 }
 
 /*

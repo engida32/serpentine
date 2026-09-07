@@ -1,5 +1,5 @@
 import { sfx } from "../game/audio";
-import { IconChevron } from "./icons";
+import { IconChevron, IconSound } from "./icons";
 
 type ButtonExtras = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "children" | "className" | "title" | "disabled" | "type">;
 
@@ -51,6 +51,24 @@ export function ArcadeButton({
   );
 }
 
+/** Remote/navigation-friendly mute toggle for overlay menus. */
+export function MuteBtn({
+  muted,
+  onToggle,
+  className = "",
+}: {
+  muted: boolean;
+  onToggle: () => void;
+  className?: string;
+}) {
+  return (
+    <ArcadeButton onClick={onToggle} title={muted ? "Unmute" : "Mute"} className={className}>
+      <IconSound muted={muted} />
+      {muted ? "Unmute" : "Mute"}
+    </ArcadeButton>
+  );
+}
+
 export function IconBtn({
   onClick,
   title,
@@ -77,7 +95,7 @@ export function IconBtn({
         sfx.click();
         onClick();
       }}
-      className={`w-10 h-10 grid place-items-center rounded-md bg-moss border border-line border-b-4 border-b-[#08150e]
+      className={`w-10 h-10 tv:w-12 tv:h-12 grid place-items-center rounded-md bg-moss border border-line border-b-4 border-b-[#08150e]
         text-mint hover:bg-fern hover:text-lime active:translate-y-[2px] active:border-b transition-all duration-100
         disabled:opacity-35 disabled:pointer-events-none cursor-pointer ${className}`}
     >

@@ -68,6 +68,7 @@ export function FeedbackModal({ open, onClose }: { open: boolean; onClose: () =>
     >
       <div
         ref={panelRef}
+        data-menu
         tabIndex={-1}
         role="dialog"
         aria-modal="true"

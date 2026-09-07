@@ -3,9 +3,10 @@ import { burst } from "../ui/confetti";
 import { Breakout, type BreakHud } from "../game/breakout";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
-import { ArcadeButton, HoldPad, IconBtn, Stat } from "../ui/controls";
+import { ArcadeButton, HoldPad, IconBtn, MuteBtn, Stat } from "../ui/controls";
 import { IconBreakout, IconHome, IconPause, IconPlay, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { isTypingTarget, useGamepad, useRemoteHeld, useShellBack } from "../ui/input";
+import { useControlMode } from "../ui/useDisplayMode";
 import { ShareButton } from "../ui/ShareButton";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
@@ -42,9 +43,7 @@ export function BreakoutGame({
   const [hud, setHud] = useState<BreakHud>(INITIAL_HUD);
   const [boardSize, setBoardSize] = useState(320);
   const [lbOpen, setLbOpen] = useState(false);
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const { isTouch } = useControlMode();
 
   const eng = () => engineRef.current;
 
@@ -70,9 +69,9 @@ export function BreakoutGame({
     engineRef.current = e;
     const ro = new ResizeObserver(() => {
       const r = container.getBoundingClientRect();
-      const s = Math.max(240, Math.floor(Math.min(r.width, r.height)));
+      const s = Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height))));
       setBoardSize(s);
-      e.resize(s, s, window.devicePixelRatio || 1);
+      e.resize(s, s, Math.min(window.devicePixelRatio || 1, 2));
     });
     ro.observe(container);
     return () => {
@@ -218,8 +217,9 @@ export function BreakoutGame({
                 Clear every brick. {hud.best > 0 ? `Your best: ${hud.best}. ` : ""}Three balls, one wall.
               </p>
               <ArcadeButton variant="primary" data-autofocus big onClick={start}><IconRestart /> Play</ArcadeButton>
+              <MuteBtn muted={muted} onToggle={onMute} />
               <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
-                {isCoarse ? (
+                {isTouch ? (
                   <>Hold <span className="keycap">◀</span><span className="keycap">▶</span> to move the paddle, tap <span className="keycap">●</span> to launch</>
                 ) : (
                   <><span className="keycap">◀</span><span className="keycap">▶</span> or mouse to move · <span className="keycap">Space</span> to launch · <span className="keycap">Enter</span> to play</>
@@ -238,6 +238,7 @@ export function BreakoutGame({
                 <ArcadeButton variant="primary" data-autofocus onClick={() => eng()?.togglePause()}><IconPlay /> Resume</ArcadeButton>
                 <ArcadeButton onClick={start}><IconRestart /> Restart</ArcadeButton>
                 <ArcadeButton onClick={onExit}><IconHome /> Menu</ArcadeButton>
+                <MuteBtn muted={muted} onToggle={onMute} />
               </div>
               <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
                 <span className="keycap">P</span> to resume
@@ -272,6 +273,7 @@ export function BreakoutGame({
               <div className="flex flex-wrap items-center justify-center gap-2.5">
                 <ArcadeButton variant="primary" data-autofocus big onClick={start}><IconRestart /> Play Again</ArcadeButton>
                 <ArcadeButton onClick={onExit}><IconHome /> Menu</ArcadeButton>
+                <MuteBtn muted={muted} onToggle={onMute} />
               </div>
               <ShareButton payload={sharePayload} />
             </div>
@@ -279,7 +281,7 @@ export function BreakoutGame({
         </div>
       </div>
 
-      {isCoarse ? (
+      {isTouch ? (
         <div className="shrink-0 pb-2 flex items-center justify-center gap-5">
           <HoldPad dir="left" label="Paddle left" onHold={(v) => setManual("left", v)} />
           <HoldPad dir="right" label="Paddle right" onHold={(v) => setManual("right", v)} />

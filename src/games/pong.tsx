@@ -3,8 +3,9 @@ import { PongEngine, POINT_TARGET, type PongHud } from "../game/pong";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
 import { burst } from "../ui/confetti";
-import { ArcadeButton, IconBtn, Stat } from "../ui/controls";
+import { ArcadeButton, IconBtn, MuteBtn, Stat } from "../ui/controls";
 import { isTypingTarget, useGamepad, useShellBack } from "../ui/input";
+import { useControlMode } from "../ui/useDisplayMode";
 import { IconChevron, IconHome, IconPause, IconPlay, IconPong, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { ShareButton } from "../ui/ShareButton";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
@@ -85,9 +86,7 @@ export function PongGame({
   const [hud, setHud] = useState<PongHud>(INITIAL_HUD);
   const [boardSize, setBoardSize] = useState(320);
   const [lbOpen, setLbOpen] = useState(false);
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const { isTouch } = useControlMode();
 
   const eng = () => engineRef.current;
 
@@ -120,9 +119,9 @@ export function PongGame({
     engineRef.current = eng2;
     const ro = new ResizeObserver(() => {
       const r = container.getBoundingClientRect();
-      const s = Math.max(240, Math.floor(Math.min(r.width, r.height)));
+      const s = Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height))));
       setBoardSize(s);
-      eng2.resize(s, s, window.devicePixelRatio || 1);
+      eng2.resize(s, s, Math.min(window.devicePixelRatio || 1, 2));
     });
     ro.observe(container);
     return () => {
@@ -317,8 +316,9 @@ export function PongGame({
               <ArcadeButton variant="primary" data-autofocus big onClick={start}>
                 <IconRestart /> Play
               </ArcadeButton>
+              <MuteBtn muted={muted} onToggle={onMute} />
               <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
-                {isCoarse ? (
+                {isTouch ? (
                   <>Hold the pad (or touch) to steer your paddle</>
                 ) : (
                   <>
@@ -342,6 +342,7 @@ export function PongGame({
                 <ArcadeButton variant="primary" data-autofocus onClick={() => eng()?.togglePause()}><IconPlay /> Resume</ArcadeButton>
                 <ArcadeButton onClick={() => eng()?.start()}><IconRestart /> Restart</ArcadeButton>
                 <ArcadeButton onClick={onExit}><IconHome /> Menu</ArcadeButton>
+                <MuteBtn muted={muted} onToggle={onMute} />
               </div>
               <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
                 <span className="keycap">P</span> to resume
@@ -381,6 +382,7 @@ export function PongGame({
                 <ArcadeButton onClick={onExit}>
                   <IconHome /> Menu
                 </ArcadeButton>
+                <MuteBtn muted={muted} onToggle={onMute} />
               </div>
               <ShareButton payload={sharePayload} />
             </div>
@@ -389,7 +391,7 @@ export function PongGame({
       </div>
 
       {/* controls */}
-      {isCoarse ? (
+      {isTouch ? (
         <div className="shrink-0 pb-2 flex items-center justify-center gap-5">
           <HoldPad dir="up" onHold={(v) => eng()?.setPlayerUp(v)} />
           <DPadRestart onPress={() => eng()?.start()} />

@@ -4,7 +4,7 @@ import { Blocks, BSIZE, type BTile, type BlockPhase } from "../game/block";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
 import type { DirName } from "../game/engine";
-import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
+import { ArcadeButton, DPad, IconBtn, MuteBtn, Stat } from "../ui/controls";
 import {
   IconChevron,
   IconCrown,
@@ -15,6 +15,7 @@ import {
   IconTrophy,
 } from "../ui/icons";
 import { isTypingTarget, useGamepad, useShellBack } from "../ui/input";
+import { useControlMode } from "../ui/useDisplayMode";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import { ShareButton } from "../ui/ShareButton";
 import type { SharePayload } from "../game/share";
@@ -49,10 +50,10 @@ function tileVisual(v: number): { cls: string; grad?: string } {
 }
 
 function tileFont(v: number): string {
-  if (v < 100) return "text-[22px] sm:text-[28px]";
-  if (v < 1000) return "text-[18px] sm:text-[22px]";
-  if (v < 10000) return "text-[14px] sm:text-[18px]";
-  return "text-[11px] tv:text-lg sm:text-[14px]";
+  if (v < 100) return "text-[22px] sm:text-[28px] tv:text-[36px]";
+  if (v < 1000) return "text-[18px] sm:text-[22px] tv:text-[28px]";
+  if (v < 10000) return "text-[14px] sm:text-[18px] tv:text-[22px]";
+  return "text-[11px] tv:text-[18px] sm:text-[14px]";
 }
 
 export function BlockGame({
@@ -79,9 +80,7 @@ export function BlockGame({
   const [winToast, setWinToast] = useState(false);
   const [boardSize, setBoardSize] = useState(320);
   const [lbOpen, setLbOpen] = useState(false);
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const { isTouch } = useControlMode();
 
   const eng = () => engineRef.current;
 
@@ -136,7 +135,7 @@ export function BlockGame({
     const ro = new ResizeObserver(() => {
       const r = containerRef.current?.getBoundingClientRect();
       if (!r) return;
-      const s = Math.max(240, Math.floor(Math.min(r.width, r.height)));
+      const s = Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height))));
       setBoardSize(s);
     });
     if (containerRef.current) ro.observe(containerRef.current);
@@ -371,6 +370,7 @@ export function BlockGame({
                 <ArcadeButton onClick={() => setLbOpen(true)}>
                   <IconTrophy /> Save Score
                 </ArcadeButton>
+                <MuteBtn muted={muted} onToggle={onMute} />
               </div>
               <ShareButton payload={sharePayload} />
             </div>
@@ -379,7 +379,7 @@ export function BlockGame({
       </div>
 
       {/* controls */}
-      {isCoarse ? (
+      {isTouch ? (
         <div className="shrink-0 pb-2 flex items-center justify-center gap-8">
           <div className="grid grid-cols-3 gap-1.5">
             <span />

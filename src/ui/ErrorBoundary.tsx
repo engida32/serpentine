@@ -57,7 +57,7 @@ export class GameErrorBoundary extends Component<Props, State> {
           </ArcadeButton>
         </div>
         {import.meta.env.DEV && (
-          <pre className="mt-2 max-w-[720px] overflow-auto text-left text-[11px] text-fog/70 bg-pit/80 border border-line rounded-md p-3">
+          <pre className="mt-2 max-w-[720px] overflow-auto text-left text-[11px] tv:text-sm text-fog/70 bg-pit/80 border border-line rounded-md p-3">
             {this.state.error.message}
           </pre>
         )}

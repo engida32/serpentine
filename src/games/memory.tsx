@@ -4,9 +4,10 @@ import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
 import { burst } from "../ui/confetti";
 import type { DirName } from "../game/engine";
-import { ArcadeButton, DPad, IconBtn, Stat } from "../ui/controls";
+import { ArcadeButton, DPad, IconBtn, MuteBtn, Stat } from "../ui/controls";
 import { IconChevron, IconHome, IconMemory, IconQuestion, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { isTypingTarget, useGamepad, useShellBack } from "../ui/input";
+import { useControlMode } from "../ui/useDisplayMode";
 import { ShareButton } from "../ui/ShareButton";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
@@ -44,9 +45,7 @@ export function MemoryGame({
   const [best, setBest] = useState(readBest);
   const [boardSize, setBoardSize] = useState(320);
   const [lbOpen, setLbOpen] = useState(false);
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const { isTouch } = useControlMode();
 
   const eng = () => engineRef.current;
 
@@ -74,7 +73,7 @@ export function MemoryGame({
     const ro = new ResizeObserver(() => {
       const r = containerRef.current?.getBoundingClientRect();
       if (!r) return;
-      setBoardSize(Math.max(240, Math.floor(Math.min(r.width, r.height))));
+      setBoardSize(Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height)))));
     });
     if (containerRef.current) ro.observe(containerRef.current);
     return () => {
@@ -239,7 +238,7 @@ export function MemoryGame({
         `}
         style={{ aspectRatio: "1/1" }}
       >
-        <span className={`font-display text-[14px] sm:text-2xl ${c.matched ? "text-gold" : "text-lime"}`}>
+        <span className={`font-display text-[14px] sm:text-2xl tv:text-3xl ${c.matched ? "text-gold" : "text-lime"}`}>
           {up ? SYMBOLS[c.value] : <IconQuestion />}
         </span>
       </button>
@@ -288,8 +287,9 @@ export function MemoryGame({
                 Eight pairs, hidden. Flip two, remember all, clear the board in the fewest moves.
               </p>
               <ArcadeButton variant="primary" data-autofocus big onClick={restart}><IconRestart /> Play</ArcadeButton>
+              <MuteBtn muted={muted} onToggle={onMute} />
               <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
-                {isCoarse ? (
+                {isTouch ? (
                   <>Move with the pad, tap the centre to flip a card</>
                 ) : (
                   <>Arrows move · <span className="keycap">Enter</span> flip</>
@@ -319,6 +319,7 @@ export function MemoryGame({
               <div className="flex flex-wrap items-center justify-center gap-2.5">
                 <ArcadeButton variant="primary" data-autofocus big onClick={restart}><IconRestart /> Play Again</ArcadeButton>
                 <ArcadeButton onClick={onExit}><IconHome /> Menu</ArcadeButton>
+                <MuteBtn muted={muted} onToggle={onMute} />
               </div>
               <ShareButton payload={sharePayload} />
             </div>
@@ -326,7 +327,7 @@ export function MemoryGame({
         </div>
       </div>
 
-      {isCoarse ? (
+      {isTouch ? (
         <div className="shrink-0 pb-2 flex items-center justify-center gap-8">
           <div className="grid grid-cols-3 gap-1.5">
             <span />

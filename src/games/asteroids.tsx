@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Asteroids, type AstHud } from "../game/asteroids";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
-import { ArcadeButton, HoldPad, IconBtn, Stat } from "../ui/controls";
+import { ArcadeButton, HoldPad, IconBtn, MuteBtn, Stat } from "../ui/controls";
 import { IconAsteroid, IconHome, IconPause, IconPlay, IconRestart, IconSound, IconTrophy } from "../ui/icons";
 import { isTypingTarget, useGamepad, useRemoteHeld, useShellBack } from "../ui/input";
+import { useControlMode } from "../ui/useDisplayMode";
 import { ShareButton } from "../ui/ShareButton";
 import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
@@ -40,9 +41,7 @@ export function AsteroidsGame({
   const [hud, setHud] = useState<AstHud>(INITIAL_HUD);
   const [boardSize, setBoardSize] = useState(320);
   const [lbOpen, setLbOpen] = useState(false);
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const { isTouch } = useControlMode();
 
   const eng = () => engineRef.current;
 
@@ -68,9 +67,9 @@ export function AsteroidsGame({
     engineRef.current = e;
     const ro = new ResizeObserver(() => {
       const r = container.getBoundingClientRect();
-      const s = Math.max(240, Math.floor(Math.min(r.width, r.height)));
+      const s = Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height))));
       setBoardSize(s);
-      e.resize(s, s, window.devicePixelRatio || 1);
+      e.resize(s, s, Math.min(window.devicePixelRatio || 1, 2));
     });
     ro.observe(container);
     return () => {
@@ -181,8 +180,9 @@ export function AsteroidsGame({
                 Outrun the belt. Shoot big rocks into small rocks. Last ship standing.
               </p>
               <ArcadeButton variant="primary" data-autofocus big onClick={start}><IconRestart /> Play</ArcadeButton>
+              <MuteBtn muted={muted} onToggle={onMute} />
               <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
-                {isCoarse ? (
+                {isTouch ? (
                   <>Hold <span className="keycap">◀</span><span className="keycap">▶</span> to turn, <span className="keycap">▲</span> to thrust, tap <span className="keycap">●</span> to fire</>
                 ) : (
                   <><span className="keycap">←</span><span className="keycap">→</span> turn · <span className="keycap">↑</span> thrust · <span className="keycap">Space</span> fire · <span className="keycap">Enter</span> to play</>
@@ -201,6 +201,7 @@ export function AsteroidsGame({
                 <ArcadeButton variant="primary" data-autofocus onClick={() => eng()?.togglePause()}><IconPlay /> Resume</ArcadeButton>
                 <ArcadeButton onClick={start}><IconRestart /> Restart</ArcadeButton>
                 <ArcadeButton onClick={onExit}><IconHome /> Menu</ArcadeButton>
+                <MuteBtn muted={muted} onToggle={onMute} />
               </div>
               <p className="text-[11px] tv:text-lg text-fog/80 flex items-center gap-1.5">
                 <span className="keycap">P</span> to resume
@@ -227,6 +228,7 @@ export function AsteroidsGame({
               <div className="flex flex-wrap items-center justify-center gap-2.5">
                 <ArcadeButton variant="primary" data-autofocus big onClick={start}><IconRestart /> Play Again</ArcadeButton>
                 <ArcadeButton onClick={onExit}><IconHome /> Menu</ArcadeButton>
+                <MuteBtn muted={muted} onToggle={onMute} />
               </div>
               <ShareButton payload={sharePayload} />
             </div>
@@ -234,7 +236,7 @@ export function AsteroidsGame({
         </div>
       </div>
 
-      {isCoarse ? (
+      {isTouch ? (
         <div className="shrink-0 pb-2 flex items-center justify-center gap-5">
           <HoldPad dir="left" label="Turn left" onHold={(v) => setManual("left", v)} />
           <HoldPad dir="up" label="Thrust" onHold={(v) => setManual("up", v)} />

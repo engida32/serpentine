@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { sfx } from "./game/audio";
 import { GAMES, type GameDef } from "./games";
 import { gamesPlayed, TROPHIES, totalPoints, trophiesForGame, trophyCount } from "./game/progress";
@@ -6,7 +6,8 @@ import { IconBtn } from "./ui/controls";
 import { GameErrorBoundary } from "./ui/ErrorBoundary";
 import { IconChevron, IconMinimize, IconExpand, IconSound, IconTrophy, IconChat, LogoMark } from "./ui/icons";
 import { useFullscreen } from "./ui/fullscreen";
-import { autoTvMode, installInput, isTypingTarget, routeBack, useGamepad } from "./ui/input";
+import { installInput, isTypingTarget, routeBack, useGamepad } from "./ui/input";
+import { useControlMode } from "./ui/useDisplayMode";
 import { installNativeBack, isNative } from "./platform/native";
 import { trackEvent } from "./platform/analytics";
 import { TrophyModal } from "./ui/TrophyModal";
@@ -36,7 +37,8 @@ export default function Arcade() {
       return false;
     }
   });
-  const tv = useMemo(() => autoTvMode() || isNative, []);
+  const { isTv } = useControlMode();
+  const tv = isTv || isNative;
 
   const gameIdRef = useRef(gameId);
   gameIdRef.current = gameId;
@@ -157,7 +159,8 @@ export default function Arcade() {
 
   return (
     <div
-      className="h-full min-h-dvh flex flex-col overflow-hidden relative bg-ink text-foam"
+      data-tv={tv ? "true" : undefined}
+      className="h-full min-h-dvh flex flex-col overflow-hidden relative bg-ink text-foam tv:px-[2.5vw] tv:pt-[2vh] tv:pb-[1.5vh]"
       onPointerDown={() => sfx.unlock()}
     >
       {/* ambient layers */}
@@ -174,7 +177,7 @@ export default function Arcade() {
       </div>
 
       {/* header */}
-      <header className="relative z-10 flex items-center justify-between px-3 sm:px-6 tv:px-10 h-14 sm:h-16 tv:h-20 shrink-0 border-b border-line/60 bg-pit/60">
+      <header className="relative z-10 flex items-center justify-between px-3 sm:px-6 h-14 sm:h-16 tv:h-20 shrink-0 border-b border-line/60 bg-pit/60">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <LogoMark />
           <div className="leading-none min-w-0">
@@ -253,7 +256,7 @@ export default function Arcade() {
             data-menu
             role="group"
             aria-label="Games"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 tv:grid-cols-4 gap-3 sm:gap-4 tv:gap-5 w-full max-w-[820px] tv:max-w-[1500px]"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 w-full max-w-[820px] xl:max-w-[1320px] tv:max-w-[1500px]"
           >
             {GAMES.map((g, i) => {
               const isActive = sel === i;

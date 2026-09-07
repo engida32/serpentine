@@ -41,6 +41,7 @@ export function TrophyModal({
     >
       <div
         ref={panelRef}
+        data-menu
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
@@ -104,7 +105,7 @@ export function TrophyModal({
                           {unlocked ? <IconCheck /> : <span className="font-display text-[9px] tv:text-sm">?</span>}
                         </span>
                         <span className="min-w-0">
-                          <span className={`block font-bold text-[12px] ${unlocked ? "text-foam" : "text-fog"}`}>{t.name}</span>
+                          <span className={`block font-bold text-[12px] tv:text-base ${unlocked ? "text-foam" : "text-fog"}`}>{t.name}</span>
                           <span className="block text-[10px] tv:text-base text-fog/80">{t.hint}</span>
                         </span>
                       </li>

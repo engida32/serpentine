@@ -10,12 +10,19 @@ import {
 } from "../game/leaderboard";
 import { weekId } from "../game/progress";
 import { sfx } from "../game/audio";
-import { IconTrophy } from "./icons";
-import { ArcadeButton } from "./controls";
+import { IconChevron, IconRestart, IconTrophy } from "./icons";
+import { ArcadeButton, IconBtn } from "./controls";
 import { useBackHandler } from "./input";
+import { useControlMode } from "./useDisplayMode";
 import { trackEvent } from "../platform/analytics";
 
 type LbMode = "all" | "week";
+
+/** Arcade-style names a TV remote can pick from without a keyboard. */
+const TV_NAMES = [
+  "ACE", "NOVA", "PX-84", "BLAZE", "VIPER", "ZERO", "MINT", "KABOOM",
+  "ROBO", "JAGUAR", "NEON", "DRIFT", "NINJA", "COBRA", "PHANTOM", "GHOST",
+];
 
 function rankBadge(i: number): string {
   if (i === 0) return "bg-gold text-ink";
@@ -48,6 +55,22 @@ export function LeaderboardModal({
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<LbMode>("all");
   const panelRef = useRef<HTMLDivElement>(null);
+  const { isTv } = useControlMode();
+
+  const tvName = (name.trim() ? name : TV_NAMES[0]).trim();
+
+  const cycleName = (d: number) => {
+    sfx.select();
+    const idx = TV_NAMES.indexOf(name.trim());
+    const base = idx >= 0 ? idx : d > 0 ? -1 : TV_NAMES.length;
+    setName(TV_NAMES[(base + d + TV_NAMES.length) % TV_NAMES.length]);
+  };
+
+  const shuffleName = () => {
+    sfx.select();
+    const n = TV_NAMES[Math.floor(Math.random() * TV_NAMES.length)];
+    setName(n === name.trim() && TV_NAMES.length > 1 ? TV_NAMES[(TV_NAMES.indexOf(n) + 1) % TV_NAMES.length] : n);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -85,7 +108,7 @@ export function LeaderboardModal({
     if (!canSave) return;
     setSaving(true);
     sfx.select();
-    const n = cleanName(name || getPlayerName());
+    const n = cleanName(isTv ? tvName : name || getPlayerName());
     setPlayerName(n);
     setName(n);
     submitScore(n, difficulty, myScore).then(() => {
@@ -102,6 +125,7 @@ export function LeaderboardModal({
     >
       <div
         ref={panelRef}
+        data-menu
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
@@ -207,19 +231,46 @@ export function LeaderboardModal({
               <label className="font-display text-[8px] tv:text-xs text-fog tracking-wider" htmlFor="lb-name">
                 SAVE YOUR SCORE — {myScore}
               </label>
-              <div className="flex gap-2">
-                <input
-                  id="lb-name"
-                  value={name}
-                  maxLength={12}
-                  autoComplete="off"
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="NAME"
-                  className="flex-1 min-w-0 bg-ink/70 border border-line rounded-md px-3 py-2 text-foam font-bold text-sm focus:outline-none focus:border-lime placeholder:text-fog/50"
-                />
-                <ArcadeButton variant="primary" data-autofocus onClick={doSave} className="shrink-0">
-                  Save
-                </ArcadeButton>
+              <div className="flex flex-col gap-2">
+                {isTv ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <IconBtn title="Previous name" onClick={() => cycleName(-1)}>
+                        <IconChevron rotate={-90} />
+                      </IconBtn>
+                      <span className="flex-1 min-w-0 bg-ink/70 border border-line rounded-md px-3 py-2 text-center font-display text-sm text-foam truncate">
+                        {tvName}
+                      </span>
+                      <IconBtn title="Next name" onClick={() => cycleName(1)}>
+                        <IconChevron rotate={90} />
+                      </IconBtn>
+                      <IconBtn title="Random name" onClick={shuffleName}>
+                        <IconRestart />
+                      </IconBtn>
+                    </div>
+                    <p className="text-[8px] tv:text-xs font-display text-fog/70 tracking-wider text-center">
+                      ◀ ▶ change name · OK to save
+                    </p>
+                    <ArcadeButton variant="primary" data-autofocus onClick={doSave}>
+                      <IconTrophy /> Save
+                    </ArcadeButton>
+                  </>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      id="lb-name"
+                      value={name}
+                      maxLength={12}
+                      autoComplete="off"
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="NAME"
+                      className="flex-1 min-w-0 bg-ink/70 border border-line rounded-md px-3 py-2 text-foam font-bold text-sm focus:outline-none focus:border-lime placeholder:text-fog/50"
+                    />
+                    <ArcadeButton variant="primary" data-autofocus onClick={doSave} className="shrink-0">
+                      Save
+                    </ArcadeButton>
+                  </div>
+                )}
               </div>
             </form>
           )}
