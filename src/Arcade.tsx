@@ -160,8 +160,9 @@ export default function Arcade() {
   return (
     <div
       data-tv={tv ? "true" : undefined}
-      className="h-full min-h-dvh flex flex-col overflow-hidden relative bg-ink text-foam tv:px-[2.5vw] tv:pt-[2vh] tv:pb-[1.5vh]"
+      className="h-full min-h-dvh flex flex-col overflow-hidden overflow-x-hidden relative bg-ink text-foam tv:px-[2.5vw] tv:pt-[2vh] tv:pb-[1.5vh] max-w-[100vw]"
       onPointerDown={() => sfx.unlock()}
+      style={{ touchAction: "manipulation" }}
     >
       {/* ambient layers */}
       <div className="pointer-events-none absolute inset-0">
@@ -213,7 +214,7 @@ export default function Arcade() {
           {active.render({ muted, onMute, onExit: exitGame, onFullscreen: toggle })}
         </GameErrorBoundary>
       ) : (
-        <main className="relative z-10 flex-1 min-h-0 flex flex-col items-center justify-center gap-5 sm:gap-6 tv:gap-8 px-4 py-6 overflow-y-auto">
+        <main className="relative z-10 flex-1 min-h-0 flex flex-col items-center justify-center gap-5 sm:gap-6 tv:gap-8 px-4 py-6 overflow-y-auto overflow-x-hidden">
           <div className="text-center">
             <p className="font-display text-[9px] tv:text-sm text-gold tracking-widest animate-blink">— INSERT COIN —</p>
             <h2
@@ -256,7 +257,7 @@ export default function Arcade() {
             data-menu
             role="group"
             aria-label="Games"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 w-full max-w-[820px] xl:max-w-[1320px] tv:max-w-[1500px]"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 w-full max-w-[820px] xl:max-w-[1320px] tv:max-w-[1500px] min-w-0"
           >
             {GAMES.map((g, i) => {
               const isActive = sel === i;
@@ -272,7 +273,7 @@ export default function Arcade() {
                   onClick={() => play(g.id)}
                   onFocus={() => setSel(i)}
                   onMouseEnter={() => setSel(i)}
-                  className={`game-card group relative rounded-lg border-2 bg-pit/85 p-5 sm:p-6 text-left transition-all duration-150 cursor-pointer
+                  className={`game-card group relative rounded-lg border-2 bg-pit/85 p-5 sm:p-6 text-left transition-all duration-150 cursor-pointer min-w-0
                     ${isActive ? "bg-moss/70" : "hover:bg-moss/40"}`}
                   style={{
                     borderColor: isActive ? hex : "rgba(39,148,104,0.5)",

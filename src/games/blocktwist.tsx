@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { burst } from "../ui/confetti";
 import { Blocks, BSIZE, type BTile, type BlockPhase } from "../game/block";
 import { sfx } from "../game/audio";
@@ -21,12 +21,19 @@ import { ShareButton } from "../ui/ShareButton";
 import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
 
-const BEST_KEY = "serpentine.2048.best";
+const CONFIG = {
+  BEST_KEY: "serpentine.2048.best",
+  MIN_SIZE: 240,
+  MAX_DPR: 2,
+};
 const CELL = 100 / BSIZE;
 
 function readBest(): number {
   try {
-    return Number(localStorage.getItem(BEST_KEY) ?? 0) || 0;
+    const raw = localStorage.getItem(CONFIG.BEST_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    return typeof parsed === 'number' && !isNaN(parsed) ? parsed : 0;
   } catch {
     return 0;
   }
@@ -135,7 +142,7 @@ export function BlockGame({
     const ro = new ResizeObserver(() => {
       const r = containerRef.current?.getBoundingClientRect();
       if (!r) return;
-      const s = Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height))));
+      const s = Math.max(CONFIG.MIN_SIZE, Math.floor(Math.min(r.width, r.height)));
       setBoardSize(s);
     });
     if (containerRef.current) ro.observe(containerRef.current);

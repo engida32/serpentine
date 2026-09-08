@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { burst } from "../ui/confetti";
 import {
   DIFFICULTIES,
@@ -90,7 +90,7 @@ export function SnakeGame({
     engineRef.current = eng2;
     const ro = new ResizeObserver(() => {
       const r = container.getBoundingClientRect();
-      const s = Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height))));
+      const s = Math.max(CONFIG.MIN_SIZE, Math.floor(Math.min(r.width, r.height)));
       setBoardSize(s);
       eng2.resize(s, s, Math.min(window.devicePixelRatio || 1, 2));
     });
@@ -304,7 +304,13 @@ export function SnakeGame({
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full block"
+            role="img"
+            aria-label="Game canvas. Use arrow keys to move, space to interact."
+            tabIndex={0}
+          />
           <div className="absolute inset-0 crt-lines pointer-events-none z-10 opacity-70" />
           <div className="absolute inset-0 board-vignette pointer-events-none z-10" />
           {["top-1.5 left-1.5", "top-1.5 right-1.5", "bottom-1.5 left-1.5", "bottom-1.5 right-1.5"].map((p) => (

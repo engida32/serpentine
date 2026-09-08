@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Asteroids, type AstHud } from "../game/asteroids";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
@@ -11,12 +11,19 @@ import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
 
-const BEST_KEY = "serpentine.asteroids.best";
+const CONFIG = {
+  BEST_KEY: "serpentine.asteroids.best",
+  MIN_SIZE: 240,
+  MAX_DPR: 2,
+};
 const INITIAL_HUD: AstHud = { phase: "idle", score: 0, lives: 3, best: 0, rocks: 0 };
 
 function readBest(): number {
   try {
-    return Number(localStorage.getItem(BEST_KEY) ?? 0) || 0;
+    const raw = localStorage.getItem(CONFIG.BEST_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    return typeof parsed === 'number' && !isNaN(parsed) ? parsed : 0;
   } catch {
     return 0;
   }
@@ -67,7 +74,7 @@ export function AsteroidsGame({
     engineRef.current = e;
     const ro = new ResizeObserver(() => {
       const r = container.getBoundingClientRect();
-      const s = Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height))));
+      const s = Math.max(CONFIG.MIN_SIZE, Math.floor(Math.min(r.width, r.height)));
       setBoardSize(s);
       e.resize(s, s, Math.min(window.devicePixelRatio || 1, 2));
     });
@@ -120,11 +127,12 @@ export function AsteroidsGame({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const start = () => {
+  const start = useCallback(() => {
+    // wrapped in useCallback
     sfx.unlock();
     sfx.start();
     eng()?.start();
-  };
+  }, []);
 
   const sharePayload: SharePayload = {
     game: "ASTEROIDS",
@@ -166,7 +174,13 @@ export function AsteroidsGame({
             shadow-[0_0_70px_rgba(238,246,236,0.08),0_26px_60px_rgba(0,0,0,0.55),inset_0_0_0_1px_rgba(6,17,12,0.9)]"
           style={{ width: boardSize, height: boardSize, touchAction: "none" }}
         >
-          <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full block"
+            role="img"
+            aria-label="Game canvas. Use arrow keys to move, space to interact."
+            tabIndex={0}
+          />
           <div className="absolute inset-0 crt-lines pointer-events-none z-10 opacity-50" />
           <div className="absolute inset-0 board-vignette pointer-events-none z-10" />
 

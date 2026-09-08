@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { burst } from "../ui/confetti";
 import { Breakout, type BreakHud } from "../game/breakout";
 import { sfx } from "../game/audio";
@@ -12,12 +12,19 @@ import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
 
-const BEST_KEY = "serpentine.breakout.best";
+const CONFIG = {
+  BEST_KEY: "serpentine.breakout.best",
+  MIN_SIZE: 240,
+  MAX_DPR: 2,
+};
 const INITIAL_HUD: BreakHud = { phase: "idle", score: 0, lives: 3, best: 0 };
 
 function readBest(): number {
   try {
-    return Number(localStorage.getItem(BEST_KEY) ?? 0) || 0;
+    const raw = localStorage.getItem(CONFIG.BEST_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    return typeof parsed === 'number' && !isNaN(parsed) ? parsed : 0;
   } catch {
     return 0;
   }
@@ -69,7 +76,7 @@ export function BreakoutGame({
     engineRef.current = e;
     const ro = new ResizeObserver(() => {
       const r = container.getBoundingClientRect();
-      const s = Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height))));
+      const s = Math.max(CONFIG.MIN_SIZE, Math.floor(Math.min(r.width, r.height)));
       setBoardSize(s);
       e.resize(s, s, Math.min(window.devicePixelRatio || 1, 2));
     });
@@ -136,11 +143,12 @@ export function BreakoutGame({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const start = () => {
+  const start = useCallback(() => {
+    // wrapped in useCallback
     sfx.unlock();
     sfx.start();
     eng()?.start();
-  };
+  }, []);
 
   const sharePayload: SharePayload = {
     game: "BREAKOUT",
@@ -203,7 +211,13 @@ export function BreakoutGame({
             eng()?.setTouchX(null);
           }}
         >
-          <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full block"
+            role="img"
+            aria-label="Game canvas. Use arrow keys to move, space to interact."
+            tabIndex={0}
+          />
           <div className="absolute inset-0 crt-lines pointer-events-none z-10 opacity-50" />
           <div className="absolute inset-0 board-vignette pointer-events-none z-10" />
 

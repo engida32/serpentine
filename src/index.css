@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Critical layout fixes for responsive / no-overlap */
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; min-height: 100vh; overflow: hidden; }
+img, canvas, video, svg { display: block; max-width: 100%; height: auto; }
+
+
 /* 10-foot UI: `.tv` is set on <html> and `data-tv="true"` on the app root for TV UAs. */
 @custom-variant tv (&:where(.tv, .tv *, [data-tv="true"], [data-tv="true"] *));
 

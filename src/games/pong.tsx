@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { PongEngine, POINT_TARGET, type PongHud } from "../game/pong";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
@@ -14,11 +14,18 @@ import type { GameDef } from "./types";
 
 const INITIAL_HUD: PongHud = { phase: "idle", l: 0, r: 0, winner: null, best: 0 };
 
-const BEST_KEY = "serpentine.best.pong";
+const CONFIG = {
+  BEST_KEY: "serpentine.best.pong",
+  MIN_SIZE: 240,
+  MAX_DPR: 2,
+};
 
 function readBest(): number {
   try {
-    return Number(localStorage.getItem(BEST_KEY) ?? 0) || 0;
+    const raw = localStorage.getItem(CONFIG.BEST_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    return typeof parsed === 'number' && !isNaN(parsed) ? parsed : 0;
   } catch {
     return 0;
   }
@@ -119,7 +126,7 @@ export function PongGame({
     engineRef.current = eng2;
     const ro = new ResizeObserver(() => {
       const r = container.getBoundingClientRect();
-      const s = Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height))));
+      const s = Math.max(CONFIG.MIN_SIZE, Math.floor(Math.min(r.width, r.height)));
       setBoardSize(s);
       eng2.resize(s, s, Math.min(window.devicePixelRatio || 1, 2));
     });
@@ -221,11 +228,12 @@ export function PongGame({
     if (fresh) sfx.record();
   }, [hud.phase, hud.winner, hud.best, hud.l]);
 
-  const start = () => {
+  const start = useCallback(() => {
+    // wrapped in useCallback
     sfx.unlock();
     sfx.start();
     eng()?.start();
-  };
+  }, []);
 
   /* touch: finger follows paddle */
   const boardRect = (e: React.PointerEvent) => {
@@ -299,7 +307,13 @@ export function PongGame({
             eng()?.setTouchTarget(null);
           }}
         >
-          <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full block"
+            role="img"
+            aria-label="Game canvas. Use arrow keys to move, space to interact."
+            tabIndex={0}
+          />
           <div className="absolute inset-0 crt-lines pointer-events-none z-10 opacity-50" />
           <div className="absolute inset-0 board-vignette pointer-events-none z-10" />
 

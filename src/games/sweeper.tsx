@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Sweeper, MINES, MSIZE, type SweepPhase, type MineCell } from "../game/minesweeper";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
@@ -13,11 +13,18 @@ import { LeaderboardModal } from "../ui/LeaderboardModal";
 import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
 
-const BEST_KEY = "serpentine.mine.best";
+const CONFIG = {
+  BEST_KEY: "serpentine.mine.best",
+  MIN_SIZE: 240,
+  MAX_DPR: 2,
+};
 
 function readBest(): number {
   try {
-    return Number(localStorage.getItem(BEST_KEY) ?? 0) || 0;
+    const raw = localStorage.getItem(CONFIG.BEST_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    return typeof parsed === 'number' && !isNaN(parsed) ? parsed : 0;
   } catch {
     return 0;
   }
@@ -79,7 +86,7 @@ export function SweeperGame({
     const ro = new ResizeObserver(() => {
       const r = containerRef.current?.getBoundingClientRect();
       if (!r) return;
-      setBoardSize(Math.max(240, Math.min(900, Math.floor(Math.min(r.width, r.height)))));
+      setBoardSize(Math.max(CONFIG.MIN_SIZE, Math.floor(Math.min(r.width, r.height))));
     });
     if (containerRef.current) ro.observe(containerRef.current);
     return () => {
