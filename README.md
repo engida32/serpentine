@@ -1,5 +1,8 @@
 # Serpentine Arcade
 
+[![CI](https://github.com/engida32/serpentine/actions/workflows/ci.yml/badge.svg)](https://github.com/engida32/serpentine/actions/workflows/ci.yml)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue)
+
 An open-source, offline-first retro game store for TVs. Pick a game, plug in a
 controller (or use the remote), play. No account, no ads, no tracking — just
 arcade games designed for the couch.
