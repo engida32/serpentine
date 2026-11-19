@@ -1,5 +1,13 @@
 {
-  "name": "sandbox-workspace",
+  "name": "serpentine-arcade",
+  "version": "1.0.0",
+  "description": "Eight playable arcade classics in one browser tab, installable as a PWA and playable offline.",
+  "homepage": "https://serpentine-arcade.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/engida32/serpentine.git"
+  },
+  "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
