@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@capacitor/android": "^8.5.1",
-    "@capacitor/cli": "^8.5.1",
+    "@capacitor/cli": "^8.6.2",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.1.7",
     "@types/canvas-confetti": "^1.6.4",
