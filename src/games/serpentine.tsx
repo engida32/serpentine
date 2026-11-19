@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { burst } from "../ui/confetti";
 import {
   DIFFICULTIES,
@@ -27,6 +27,8 @@ import { LeaderboardModal } from "../ui/LeaderboardModal";
 import { ShareButton } from "../ui/ShareButton";
 import type { SharePayload } from "../game/share";
 import type { GameDef } from "./types";
+
+const MIN_BOARD_SIZE = 240;
 
 const INITIAL_HUD: HudState = {
   phase: "menu",
@@ -90,7 +92,7 @@ export function SnakeGame({
     engineRef.current = eng2;
     const ro = new ResizeObserver(() => {
       const r = container.getBoundingClientRect();
-      const s = Math.max(CONFIG.MIN_SIZE, Math.floor(Math.min(r.width, r.height)));
+      const s = Math.max(MIN_BOARD_SIZE, Math.floor(Math.min(r.width, r.height)));
       setBoardSize(s);
       eng2.resize(s, s, Math.min(window.devicePixelRatio || 1, 2));
     });

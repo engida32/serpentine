@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { burst } from "../ui/confetti";
 import { Blocks, BSIZE, type BTile, type BlockPhase } from "../game/block";
 import { sfx } from "../game/audio";
@@ -111,7 +111,7 @@ export function BlockGame({
       setBest(e.score);
       setNewBest(true);
       try {
-        localStorage.setItem(BEST_KEY, String(e.score));
+        localStorage.setItem(CONFIG.BEST_KEY, String(e.score));
       } catch {
         /* ignore */
       }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Memory, MCOL, SYMBOLS, type MemPhase } from "../game/memory";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
@@ -96,7 +96,7 @@ export function MemoryGame({
       if (moves > 0 && (best === 0 || moves < best)) {
         setBest(moves);
         try {
-          localStorage.setItem(BEST_KEY, String(moves));
+          localStorage.setItem(CONFIG.BEST_KEY, String(moves));
         } catch {
           /* ignore */
         }

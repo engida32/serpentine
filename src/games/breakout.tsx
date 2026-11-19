@@ -92,7 +92,7 @@ export function BreakoutGame({
   useEffect(() => {
     if (hud.score > readBest()) {
       try {
-        localStorage.setItem(BEST_KEY, String(hud.score));
+        localStorage.setItem(CONFIG.BEST_KEY, String(hud.score));
       } catch {
         /* ignore */
       }

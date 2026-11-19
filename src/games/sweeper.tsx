@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sweeper, MINES, MSIZE, type SweepPhase, type MineCell } from "../game/minesweeper";
 import { sfx } from "../game/audio";
 import { recordPlay, unlockTrophy } from "../game/progress";
@@ -113,7 +113,7 @@ export function SweeperGame({
       if (t > 0 && (best === 0 || t < best)) {
         setBest(t);
         try {
-          localStorage.setItem(BEST_KEY, String(t));
+          localStorage.setItem(CONFIG.BEST_KEY, String(t));
         } catch {
           /* ignore */
         }
