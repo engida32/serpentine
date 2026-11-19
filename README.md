@@ -9,6 +9,8 @@ arcade games designed for the couch.
 
 **Play it live:** https://serpentine-arcade.vercel.app
 
+![Menu screen: eight game cards with best scores and toy counts, plus the 0/20 trophy counter](docs/screenshot.png)
+
 ## Games
 
 | Game | Premise |
