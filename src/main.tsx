@@ -5,8 +5,10 @@ import "./index.css";
 import Arcade from "./Arcade.tsx";
 import { reportCrash } from "./platform/telemetry";
 
-// Vercel Web Analytics: page views + web vitals on the deployed site.
-inject();
+// Vercel Web Analytics: page views + web vitals. The injected script is served
+// by Vercel, so the GitHub Pages mirror would request a 404; gating on the host
+// keeps the mirror console clean.
+if (window.location.hostname.endsWith(".vercel.app")) inject();
 
 // Uncaught errors / rejections that escape React land as app-level crash events.
 window.addEventListener("error", (e) => reportCrash("page", e.message, `${e.filename}:${e.lineno}`));

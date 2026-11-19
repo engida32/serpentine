@@ -9,6 +9,8 @@ arcade games designed for the couch.
 
 **Play it live:** https://serpentine-arcade.vercel.app
 
+**Mirror:** https://engida32.github.io/serpentine/ (same static build, published by GitHub Pages)
+
 ![Menu screen: eight game cards with best scores and toy counts, plus the 0/20 trophy counter](docs/screenshot.png)
 
 ## Games
