@@ -89,7 +89,7 @@ npm run typecheck && npm run build
 
 ## Opening a PR
 
-1. Fork and branch from `master`.
+1. Fork and branch from `main`.
 2. Add your game (or fix) in one focused commit.
 3. Push and open a PR. In the description, note the controls and any
    deliberate design choices.
